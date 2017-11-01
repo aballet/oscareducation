@@ -74,6 +74,8 @@ class Skill(models.Model):
         return self.related_to.filter(
             from_skill__relation_type="depend_on"
         )
+    def __eq__(self, other):
+        return self.code == other.code
 
 
 class Relations(models.Model):
@@ -372,6 +374,14 @@ class StudentSkill(models.Model):
         self.save()
         self.go_down_visitor(not_recommend_student_skill)
 
+    def cant_add_objective(self):
+        req = StudentSkill.objects.filter(student=self.student)
+        list_objectives = req.exclude(is_objective = None)
+        print(list_objectives.count())
+        if list_objectives.count() >= 3:
+            return True
+        return False
+
     def recommended_to_learn(self):
         """
         Determines if the Skill is to recommend to the Student.
@@ -389,7 +399,36 @@ class StudentSkill(models.Model):
             if skill.is_objective:
                 return True"""
         return False
-    
+
+    @staticmethod
+    def __depth_sort_skills__(list_obj):
+
+        list_level = [[]]
+
+        def recursive(std_skill):
+            q_set = StudentSkill.objects.filter(skill__in=std_skill.skill.get_prerequisites_skills(), student=std_skill.student, acquired = None)  # Set of StudentSkill children not yet acquired
+            if q_set.count() == 0:
+                if std_skill.skill not in list_level[0]:
+                    list_level[0].append(std_skill.skill)
+                return 1
+            else:
+                result = 0
+                for e in q_set:
+                    a = recursive(e)
+                    if a > result:
+                        result = a
+                if len(list_level) <= result:
+                    list_level.append([])
+                if std_skill.skill not in list_level[result]:
+                    list_level[result].append(std_skill.skill)
+                return result+1
+
+        for std_skill_objective in list_obj:
+            recursive(std_skill_objective)
+
+        print(list_level)
+        return list_level
+
     class Meta:
         indexes = [
             models.Index(fields=['student', 'skill'])
