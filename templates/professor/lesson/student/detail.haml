@@ -179,6 +179,12 @@
                                       %form{action: "{% url 'professor:remove_objective_student_skill' lesson.pk student_skill.id %}", method: "post"}
                                         -csrf_token
                                         %input.btn.btn-primary{type: "submit", value: "Retirer des objectifs"}
+                                  -elif student_skill.cant_add_objective
+                                    %p
+                                      -csrf_token
+                                      %input.btn.btn-basic{type: "submit",value: "Marquer comme objetif"}
+                                    %p{style:"color:red;"}
+                                      Nombre maximal d'objectif atteint !
                                   -else
                                     %p
                                       %form{action: "{% url 'professor:set_objective_student_skill' lesson.pk student_skill.id %}", method: "post"}
