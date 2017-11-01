@@ -13,10 +13,8 @@ from examinations.models import Context
 
 class Skill(models.Model):
     """[FR] Compétence
-
         A Skill can be evaluated through questions answered by a student.
         Thus, when evaluated, a Skill can be acquired by a student, or not.
-
     """
 
     code = models.CharField(max_length=20, unique=True, db_index=True)
@@ -61,7 +59,6 @@ class Skill(models.Model):
 
     def get_prerequisites_skills(self):
         """
-
         :return: Queryset of prerequisites Skills for the current Skill
         """
 
@@ -71,7 +68,6 @@ class Skill(models.Model):
 
     def get_depending_skills(self):
         """
-
         :return: Queryset of Skills depending on the current Skill
         """
 
@@ -102,12 +98,10 @@ class Relations(models.Model):
 
 class Section(models.Model):
     """[FR] Rubrique
-
         A Section regroups a list of CodeR and a list
         of Skills. Sections form socles (most of the
         time, a socle represents a year of mathematics
         class)
-
     """
 
     name = models.CharField(max_length=255)
@@ -126,12 +120,10 @@ class Section(models.Model):
 class CodeR(models.Model):
     """[FR] Ressource (ou Code R),
     à ne pas confondre avec une ressource pédagogique
-
         A CodeR describes concept(s) to master, in orderskills_coder_skill
         to acquire the skill(s) based on that CodeR.
         Unlike a Skill, A CodeR cannot be evaluated
         directly.
-
     """
 
     section = models.ForeignKey('Section', null=True)
@@ -184,7 +176,6 @@ class SkillHistory(models.Model):
     """
         The reason why a Skill is acquired or not,
         or not yet, when and by who/how
-
     """
 
     skill = models.ForeignKey(Skill)
@@ -224,7 +215,10 @@ class StudentSkill(models.Model):
     """When the Skill was tested"""
     acquired = models.DateTimeField(default=None, null=True)
     """When the Skill was acquired"""
-
+    is_objective = models.DateTimeField(default=None, null=True)
+    """When the Skill was set as objective"""
+    is_recommended = models.DateField(default=None, null=True)
+    """When the Skill was set as recommended"""
     # bad: doesn't support regression
 
     def __unicode__(self):
@@ -281,6 +275,8 @@ class StudentSkill(models.Model):
             )
 
             student_skill.acquired = datetime.now()
+            student_skill.is_objective = None
+            student_skill.is_recommended = None
             student_skill.save()
 
         self.go_down_visitor(validate_student_skill)
@@ -331,7 +327,50 @@ class StudentSkill(models.Model):
 
         self.acquired = None
         self.tested = None
+        self.is_objective = None
         self.save()
+
+    def set_objective(self, who, reason, reason_object):
+        """"Reset" a Skill (change its status to "unknown")"""
+        def recommend_student_skill(student_skill):
+            SkillHistory.objects.create(
+                skill=self.skill,
+                student=self.student,
+                value="recommended",
+                by_who=who,
+                reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
+                reason_object=reason_object,
+            )
+
+            if(not student_skill.acquired):
+                student_skill.is_recommended = datetime.now()
+                student_skill.save()
+
+        self.is_objective = datetime.now()
+        self.is_recommended = datetime.now()
+        self.save()
+        self.go_down_visitor(recommend_student_skill)
+
+    def remove_objective(self, who, reason, reason_object):
+        """"Reset" a Skill (change its status to "unknown")"""
+        def not_recommend_student_skill(student_skill):
+            SkillHistory.objects.create(
+                skill=self.skill,
+                student=self.student,
+                value="not recommended",
+                by_who=who,
+                reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
+                reason_object=reason_object,
+            )
+
+            if(not student_skill.acquired):
+                student_skill.is_recommended = None
+                student_skill.save()
+
+        self.is_objective = None
+        self.is_recommended = None
+        self.save()
+        self.go_down_visitor(not_recommend_student_skill)
 
     def recommended_to_learn(self):
         """
@@ -339,16 +378,18 @@ class StudentSkill(models.Model):
         All the tested and not acquired Skills will be recommended,
         except if at least one of its prerequisites is not acquired
         """
-        if self.acquired or not self.tested:
+        if self.acquired :
             return False
 
-        for skill in self.skill.get_prerequisites_skills():
+        if self.is_objective or self.is_recommended:
+            return True
+
+        """for skill in self.skill.get_prerequisites_skills():
             skill = StudentSkill.objects.get(student=self.student, skill=skill)
-            if not skill.acquired and skill.tested:
-                return False
-
-        return True
-
+            if skill.is_objective:
+                return True"""
+        return False
+    
     class Meta:
         indexes = [
             models.Index(fields=['student', 'skill'])

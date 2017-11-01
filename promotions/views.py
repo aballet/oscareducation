@@ -1321,6 +1321,56 @@ def default_student_skill(request, lesson_pk, student_skill):
         reverse('professor:lesson_student_detail', args=(lesson.pk, student_skill.student.id,)) + "#heatmap")
 
 
+@require_POST
+@user_is_professor
+def set_objective_student_skill(request, lesson_pk, student_skill):
+    """
+    Set the skill as objective for a Student's Skill
+
+    :param request:
+    :param lesson_pk: primary key of a Lesson
+    :param student_skill: id of a StudentSkill
+    :return:
+    """
+    # TODO: a professor can only do this on one of his students
+    lesson = get_object_or_404(Lesson, pk=lesson_pk)
+
+    student_skill = get_object_or_404(StudentSkill, id=student_skill)
+
+    student_skill.set_objective(
+        who=request.user,
+        reason="À la main par le professeur.",
+        reason_object=lesson,
+    )
+
+    return HttpResponseRedirect(
+        reverse('professor:lesson_student_detail', args=(lesson.pk, student_skill.student.id,)) + "#heatmap")
+
+
+def remove_objective_student_skill(request, lesson_pk, student_skill):
+    """
+    Set the skill as objective for a Student's Skill
+
+    :param request:
+    :param lesson_pk: primary key of a Lesson
+    :param student_skill: id of a StudentSkill
+    :return:
+    """
+    # TODO: a professor can only do this on one of his students
+    lesson = get_object_or_404(Lesson, pk=lesson_pk)
+
+    student_skill = get_object_or_404(StudentSkill, id=student_skill)
+
+    student_skill.remove_objective(
+        who=request.user,
+        reason="À la main par le professeur.",
+        reason_object=lesson,
+    )
+
+    return HttpResponseRedirect(
+        reverse('professor:lesson_student_detail', args=(lesson.pk, student_skill.student.id,)) + "#heatmap")
+
+
 @user_is_professor
 def lesson_tests_and_skills(request, lesson_id):
     """
