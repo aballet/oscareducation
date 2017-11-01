@@ -50,6 +50,8 @@ urlpatterns = [
     url(r'^lesson/(?P<lesson_pk>\d+)/validate_skill/(?P<student_skill>\d+)/$', views.validate_student_skill, name='validate_student_skill'),
     url(r'^lesson/(?P<lesson_pk>\d+)/unvalidate_skill/(?P<student_skill>\d+)/$', views.unvalidate_student_skill, name='unvalidate_student_skill'),
     url(r'^lesson/(?P<lesson_pk>\d+)/default_skill/(?P<student_skill>\d+)/$', views.default_student_skill, name='default_student_skill'),
+    url(r'^lesson/(?P<lesson_pk>\d+)/set_objective_skill/(?P<student_skill>\d+)/$', views.set_objective_student_skill, name='set_objective_student_skill'),
+    url(r'^lesson/(?P<lesson_pk>\d+)/remove_objective_skill/(?P<student_skill>\d+)/$', views.remove_objective_student_skill, name='remove_objective_student_skill'),
 
     url(r'^lesson_tests_and_skills/(?P<lesson_id>\d+).json$', views.lesson_tests_and_skills, name='lesson_tests_and_skills'),
 

@@ -8,12 +8,11 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from examinations.models import Context
 
+
 class Skill(models.Model):
     """[FR] Compétence
-
         A Skill can be evaluated through questions answered by a student.
         Thus, when evaluated, a Skill can be acquired by a student, or not.
-
     """
 
     code = models.CharField(max_length=20, unique=True, db_index=True)
@@ -28,10 +27,10 @@ class Skill(models.Model):
     section = models.ForeignKey('Section', null=True)
     """The Section to which the Skill belongs @to remove after """
 
-    #depends_on = models.ManyToManyField('Skill', related_name="depends_on+")
+    # depends_on = models.ManyToManyField('Skill', related_name="depends_on+")
     """If a Skill depends on another (i.e. a prerequisite), this is set in this relation"""
 
-    #similar_to = models.ManyToManyField('Skill', related_name="similar_to+")
+    # similar_to = models.ManyToManyField('Skill', related_name="similar_to+")
     """The Skills that are similar, but with different references"""
 
     resource = models.ManyToManyField('resources.Resource', related_name="skill_resource+")
@@ -58,17 +57,15 @@ class Skill(models.Model):
 
     def get_prerequisites_skills(self):
         """
-
         :return: Queryset of prerequisites Skills for the current Skill
         """
-        
+
         return self.relations.filter(
             to_skill__relation_type="depend_on"
         )
 
     def get_depending_skills(self):
         """
-
         :return: Queryset of Skills depending on the current Skill
         """
 
@@ -76,41 +73,39 @@ class Skill(models.Model):
             from_skill__relation_type="depend_on"
         )
 
-class Relations(models.Model):
 
+class Relations(models.Model):
     """ The through relation skill model """
 
     from_skill = models.ForeignKey(Skill, null=False, blank=False, related_name='from_skill', default=0)
     to_skill = models.ForeignKey(Skill, null=False, blank=False, related_name='to_skill', default=0)
-    relation_type = models.CharField(max_length=255,null=False, blank=False, choices=(
+    relation_type = models.CharField(max_length=255, null=False, blank=False, choices=(
 
         ("depend_on", "dépend de"),
         ("similar_to", "similaire à"),
-        ("identic_to","identique à"),
+        ("identic_to", "identique à"),
     ))
 
     def __unicode__(self):
         return self.from_skill.code + " , " + self.to_skill.code + ", " + self.relation_type
 
     class Meta:
-
         verbose_name = 'Relations between Skill'
         verbose_name_plural = 'Relations between Skill\'s'
 
+
 class Section(models.Model):
     """[FR] Rubrique
-
         A Section regroups a list of CodeR and a list
         of Skills. Sections form socles (most of the
         time, a socle represents a year of mathematics
         class)
-
     """
 
     name = models.CharField(max_length=255)
     """The Section name"""
-    #editable=False,
-    resource = models.ManyToManyField('resources.Resource',  related_name="section_resource+")
+    # editable=False,
+    resource = models.ManyToManyField('resources.Resource', related_name="section_resource+")
     """The resources linked to this Section. A resource can be linked to several Sections"""
 
     def __unicode__(self):
@@ -123,12 +118,10 @@ class Section(models.Model):
 class CodeR(models.Model):
     """[FR] Ressource (ou Code R),
     à ne pas confondre avec une ressource pédagogique
-
         A CodeR describes concept(s) to master, in orderskills_coder_skill
         to acquire the skill(s) based on that CodeR.
         Unlike a Skill, A CodeR cannot be evaluated
         directly.
-
     """
 
     section = models.ForeignKey('Section', null=True)
@@ -140,7 +133,7 @@ class CodeR(models.Model):
     name = models.CharField(max_length=255)
     """The CodeR name"""
 
-    #paired_to = models.ManyToManyField('CodeR', related_name="paired_to+")
+    # paired_to = models.ManyToManyField('CodeR', related_name="paired_to+")
     """@todo remove """
 
     resource = models.ManyToManyField('resources.Resource', related_name="coder_resource+")
@@ -151,42 +144,36 @@ class CodeR(models.Model):
 
     def __unicode__(self):
         return self.sub_code + " : " + self.name
-    class Meta:
 
+    class Meta:
         verbose_name = 'CodeR'
         verbose_name_plural = 'CodeR'
 
 
-
-
-
-
 class CodeR_relations(models.Model):
-
     """ The through relation CodeR model  """
 
     from_coder = models.ForeignKey(CodeR, null=False, blank=False, related_name='from_coder', default=0)
     to_coder = models.ForeignKey(CodeR, null=False, blank=False, related_name='to_coder', default=0)
-    relation_type = models.CharField(max_length=255,null=False, blank=False, choices=(
+    relation_type = models.CharField(max_length=255, null=False, blank=False, choices=(
 
         ("depend_on", "dépend de"),
         ("similar_to", "similaire à"),
-        ("identic_to","identique à"),
+        ("identic_to", "identique à"),
     ))
 
     def __unicode__(self):
         return self.from_coder.name + " , " + self.to_coder.name + ", " + self.relation_type
 
     class Meta:
-
         verbose_name = 'Relations between CodeR'
         verbose_name_plural = 'Relations between CodeR\'s'
+
 
 class SkillHistory(models.Model):
     """
         The reason why a Skill is acquired or not,
         or not yet, when and by who/how
-
     """
 
     skill = models.ForeignKey(Skill)
@@ -226,10 +213,15 @@ class StudentSkill(models.Model):
     """When the Skill was tested"""
     acquired = models.DateTimeField(default=None, null=True)
     """When the Skill was acquired"""
+    is_objective = models.DateTimeField(default=None, null=True)
+    """When the Skill was set as objective"""
+    is_recommended = models.DateField(default=None, null=True)
+    """When the Skill was set as recommended"""
     # bad: doesn't support regression
 
     def __unicode__(self):
-        return u"%s - %s - %s" % (self.student, self.skill, "green" if self.acquired else ("orange" if self.tested else "white"))
+        return u"%s - %s - %s" % (
+        self.student, self.skill, "green" if self.acquired else ("orange" if self.tested else "white"))
 
     def go_down_visitor(self, function):
         """Help function to explore and validate prerequisites when a Skill is validated"""
@@ -239,7 +231,8 @@ class StudentSkill(models.Model):
         def traverse(student_skill):
             function(student_skill)
 
-            for sub_student_skill in StudentSkill.objects.filter(skill__in=student_skill.skill.get_prerequisites_skills(), student=self.student):
+            for sub_student_skill in StudentSkill.objects.filter(
+                    skill__in=student_skill.skill.get_prerequisites_skills(), student=self.student):
                 if sub_student_skill.id not in already_done:
                     already_done.add(sub_student_skill.id)
                     traverse(sub_student_skill)
@@ -258,7 +251,8 @@ class StudentSkill(models.Model):
         def traverse(student_skill):
             function(student_skill)
 
-            for sub_student_skill in StudentSkill.objects.filter(skill__in=student_skill.skill.get_prerequisites_skills(), student=self.student):
+            for sub_student_skill in StudentSkill.objects.filter(
+                    skill__in=student_skill.skill.get_prerequisites_skills(), student=self.student):
                 if sub_student_skill.id not in already_done:
                     already_done.add(sub_student_skill.id)
                     traverse(sub_student_skill)
@@ -267,6 +261,7 @@ class StudentSkill(models.Model):
 
     def validate(self, who, reason, reason_object):
         """Validates a Skill (change its status to "acquired")"""
+
         def validate_student_skill(student_skill):
             SkillHistory.objects.create(
                 skill=self.skill,
@@ -278,12 +273,15 @@ class StudentSkill(models.Model):
             )
 
             student_skill.acquired = datetime.now()
+            student_skill.is_objective = None
+            student_skill.is_recommended = None
             student_skill.save()
 
         self.go_down_visitor(validate_student_skill)
 
     def unvalidate(self, who, reason, reason_object):
         """Invalidates a Skill (change its status to "not acquired")"""
+
         def unvalidate_student_skill(student_skill):
             SkillHistory.objects.create(
                 skill=self.skill,
@@ -327,7 +325,50 @@ class StudentSkill(models.Model):
 
         self.acquired = None
         self.tested = None
+        self.is_objective = None
         self.save()
+
+    def set_objective(self, who, reason, reason_object):
+        """"Reset" a Skill (change its status to "unknown")"""
+        def recommend_student_skill(student_skill):
+            SkillHistory.objects.create(
+                skill=self.skill,
+                student=self.student,
+                value="recommended",
+                by_who=who,
+                reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
+                reason_object=reason_object,
+            )
+
+            if(not student_skill.acquired):
+                student_skill.is_recommended = datetime.now()
+                student_skill.save()
+
+        self.is_objective = datetime.now()
+        self.is_recommended = datetime.now()
+        self.save()
+        self.go_down_visitor(recommend_student_skill)
+
+    def remove_objective(self, who, reason, reason_object):
+        """"Reset" a Skill (change its status to "unknown")"""
+        def not_recommend_student_skill(student_skill):
+            SkillHistory.objects.create(
+                skill=self.skill,
+                student=self.student,
+                value="not recommended",
+                by_who=who,
+                reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
+                reason_object=reason_object,
+            )
+
+            if(not student_skill.acquired):
+                student_skill.is_recommended = None
+                student_skill.save()
+
+        self.is_objective = None
+        self.is_recommended = None
+        self.save()
+        self.go_down_visitor(not_recommend_student_skill)
 
     def recommended_to_learn(self):
         """
@@ -335,12 +376,15 @@ class StudentSkill(models.Model):
         All the tested and not acquired Skills will be recommended,
         except if at least one of its prerequisites is not acquired
         """
-        if self.acquired or not self.tested:
+        if self.acquired :
             return False
 
-        for skill in self.skill.get_prerequisites_skills():
-            skill = StudentSkill.objects.get(student=self.student, skill=skill)
-            if not skill.acquired and skill.tested:
-                return False
+        if self.is_objective or self.is_recommended:
+            return True
 
-        return True
+        """for skill in self.skill.get_prerequisites_skills():
+            skill = StudentSkill.objects.get(student=self.student, skill=skill)
+            if skill.is_objective:
+                return True"""
+
+        return False
