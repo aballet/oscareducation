@@ -11,16 +11,6 @@ def get_students_skills(context, of_keyword, student, at_keyword, stage, as_keyw
     return ""
 
 @register.simple_tag(takes_context=True)
-def go_next_line(context, as_keyword, target_name):
-    context[target_name] = StudentSkill.__next_line__()
-    return ""
-@register.simple_tag(takes_context=True)
-def reset_counter_line(context):
-    StudentSkill.__reset_counter_line__()
-    return ""
-
-
-@register.simple_tag(takes_context=True)
 def get_depth_sorted_students_skills(context, of_keyword, student, at_keyword, stage, as_keyword, target_name):
     set = StudentSkill.objects.filter(skill__in=stage.skills.all(), student=student)
     remove = set.exclude(is_objective = None)
