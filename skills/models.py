@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
 import random
 from django.db import models
 from datetime import datetime
@@ -523,8 +522,6 @@ class StudentSkill(models.Model):
             models.Index(fields=['student', 'skill'])
         ]
 
-        return False
-
     @staticmethod
     def __depth_sort_skills__(list_obj):
 
@@ -553,3 +550,18 @@ class StudentSkill(models.Model):
 
         print(list_level)
         return list_level
+
+    global var
+    var = 3
+
+    @staticmethod
+    def __next_line__():
+        global var
+        var = var-1
+        if var == 0:
+            global  var
+            var = random.randint(1,3)
+            return True
+        return False
+
+
