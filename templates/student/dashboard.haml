@@ -152,8 +152,35 @@
                         %br
 
                       %span
-
                       %a{href: '{% url "student_skill_pedagogic_ressources" "skill" student_skill.skill.code %}'}
                         %button.btn.round-section-icon.recommended{class: "fa fa-{{ student_skill.skill.image }}", title: "{{ student_skill.skill.name }}", data-toggle: "tooltip", data-placement: "right", section: "{{ student_skill.skill.section }}"}{:type => "button",:style => "width: 100px; height: 100px; padding: 10px 0px 10px 0px; margin: 20px; font-size: 16px; line-height: 1.33; border-radius: 100px;"}
                           {{ student_skill.skill.code }}
                     .ligneorangefine
+
+           %br
+           %button#comp_down_btn.compnavigation.glyphicon.glyphicon-menu-down{:style => "font-size: 30px; float:right; appearance: none; -webkit-appearance: none; -moz-appearance: none; outline: none; border: 0; background: transparent;"}
+           :javascript
+              $(document).ready(function(){
+                var skillsList = document.getElementById("skillsList");
+                $(".compnavigation").on('click', function(){
+                     skillsList.scrollTop += this.id === 'comp_down_btn' ? 30 : -30;
+                });
+              });
+
+        -if user.student.teststudent_set.all|keep_unfinished_tests|remove_closed_tests
+          -if user.student.has_recommended_skills
+            %br
+
+          .container-fluid.boxclassetitle
+            %h5 Test{{ user.student.teststudent_set.all|keep_unfinished_tests|pluralize }} à passer
+
+          .ligneorangefine
+
+          .container-fluid.boxclasse
+
+            .list-group
+              -for student_test in user.student.teststudent_set.all|keep_unfinished_tests|remove_closed_tests
+                -if not student_test.finished
+                  %a.list-group-item{href: "{% url 'student_pass_test' student_test.id %}"}
+                    %span.badge= student_test.test.created_at|date:"d/m/Y"
+                    =student_test.test.name
