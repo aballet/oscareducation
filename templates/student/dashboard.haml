@@ -142,39 +142,18 @@
            %button#comp_up_btn.compnavigation.glyphicon.glyphicon-menu-up{:style => "font-size: 30px; float:right; appearance: none; -webkit-appearance: none; -moz-appearance: none; outline: none; border: 0; background: transparent;"}
            %br
 
-            #skillsList{:style => "height:210px;overflow: hidden"}
+            #skillsList{:style => "height:400px;overflow: hidden;"}
               -for stage in lesson.stages_in_unchronological_order
                 -get_depth_sorted_students_skills of user.student at stage rename "student_skills"
                 -for level in student_skills
                     -for student_skill in level
+                      -go_next_line rename "is_next_line"
+                      -if is_next_line
+                        %br
+
                       %span
-                        %a{href: '{% url "student_skill_pedagogic_ressources" "skill" student_skill.skill.code %}'}
-                          %button.btn.round-section-icon.recommended{class: "fa fa-{{ student_skill.skill.image }}", title: "{{ student_skill.skill.name }}", data-toggle: "tooltip", data-placement: "right", section: "{{ student_skill.skill.section }}"}{:type => "button",:style => "width: 180px; height: 180px; padding: 10px 0px 10px 0px; margin: 25px 5px 25px 0px; font-size: 24px; line-height: 1.33; border-radius: 100px;"}
-                            {{ student_skill.skill.code }}
-           %br
-           %button#comp_down_btn.compnavigation.glyphicon.glyphicon-menu-down{:style => "font-size: 30px; float:right; appearance: none; -webkit-appearance: none; -moz-appearance: none; outline: none; border: 0; background: transparent;"}
-           :javascript
-              $(document).ready(function(){
-                var skillsList = document.getElementById("skillsList");
-                $(".compnavigation").on('click', function(){
-                     skillsList.scrollTop += this.id === 'comp_down_btn' ? 30 : -30;
-                });
-              });
 
-        -if user.student.teststudent_set.all|keep_unfinished_tests|remove_closed_tests
-          -if user.student.has_recommended_skills
-            %br
-
-          .container-fluid.boxclassetitle
-            %h5 Test{{ user.student.teststudent_set.all|keep_unfinished_tests|pluralize }} à passer
-
-          .ligneorangefine
-
-          .container-fluid.boxclasse
-
-            .list-group
-              -for student_test in user.student.teststudent_set.all|keep_unfinished_tests|remove_closed_tests
-                -if not student_test.finished
-                  %a.list-group-item{href: "{% url 'student_pass_test' student_test.id %}"}
-                    %span.badge= student_test.test.created_at|date:"d/m/Y"
-                    =student_test.test.name
+                      %a{href: '{% url "student_skill_pedagogic_ressources" "skill" student_skill.skill.code %}'}
+                        %button.btn.round-section-icon.recommended{class: "fa fa-{{ student_skill.skill.image }}", title: "{{ student_skill.skill.name }}", data-toggle: "tooltip", data-placement: "right", section: "{{ student_skill.skill.section }}"}{:type => "button",:style => "width: 100px; height: 100px; padding: 10px 0px 10px 0px; margin: 20px; font-size: 16px; line-height: 1.33; border-radius: 100px;"}
+                          {{ student_skill.skill.code }}
+                    .ligneorangefine

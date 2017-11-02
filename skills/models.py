@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import random
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -221,6 +221,7 @@ class StudentSkill(models.Model):
     """When the Skill was set as recommended"""
     # bad: doesn't support regression
 
+
     def __unicode__(self):
         return u"%s - %s - %s" % (
         self.student, self.skill, "green" if self.acquired else ("orange" if self.tested else "white"))
@@ -430,3 +431,18 @@ class StudentSkill(models.Model):
 
         print(list_level)
         return list_level
+
+    global var
+    var = 3
+
+    @staticmethod
+    def __next_line__():
+        global var
+        var = var-1
+        if var == 0:
+            global  var
+            var = random.randint(1,3)
+            return True
+        return False
+
+
