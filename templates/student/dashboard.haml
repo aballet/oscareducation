@@ -143,11 +143,13 @@
 
             %table.table.align-center
               -for stage in lesson.stages_in_unchronological_order
+
                 -get_students_skills of user.student at stage rename "student_skills"
                 -get_tab_recommended_skill_tag of student_skills rename "student_skills_tab"
                 -for level in student_skills_tab
                   %tr.borderless
                     -for student_skill in level
+
                       %td
                         %table.table{:border => "0"}
                           %tr
