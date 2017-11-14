@@ -3,9 +3,12 @@ from __future__ import unicode_literals
 import random
 from django.db import models
 from datetime import datetime
+
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
 from examinations.models import Context
 
 
@@ -400,6 +403,13 @@ class StudentSkill(models.Model):
             skill = StudentSkill.objects.get(student=self.student, skill=skill)
             if skill.is_objective:
                 return True"""
+
+        return False
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['student', 'skill'])
+        ]
 
         return False
 
