@@ -513,16 +513,6 @@ class StudentSkill(models.Model):
         return False
 
     @staticmethod
-    def __reset_counter_line__():
-        global var
-        var = random.randint(2,3)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['student', 'skill'])
-        ]
-
-    @staticmethod
     def __depth_sort_skills__(list_obj):
         #print("LIST OBJECTIFS")
         #print(list_obj)
@@ -573,7 +563,7 @@ class StudentSkill(models.Model):
     def __next_line__():
         if var == 0:
             global  var
-            var = random.randint(2,3)
+            var = random.randint(2, 3)
             return True
         global var
         var = var - 1
@@ -582,4 +572,4 @@ class StudentSkill(models.Model):
     @staticmethod
     def __reset_counter_line__():
         global var
-        var = random.randint(2,3)
+        var = random.randint(2, 3)
