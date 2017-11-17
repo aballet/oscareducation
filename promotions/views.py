@@ -46,7 +46,7 @@ from skills.models import StudentSkill, CodeR, Section, Relations, CodeR_relatio
 from stats.StatsObject import get_stat_for_student, get_all_uaa_for_lesson
 from users.models import Student
 from .forms import LessonForm, StudentAddForm, KhanAcademyForm, StudentUpdateForm, LessonUpdateForm, \
-    TestUpdateForm, SesamathForm, ResourceForm, CSVForm
+    TestUpdateForm, SesamathForm, ResourceForm, CSVForm, CompetencesUpdateForm
 from .utils import generate_random_password
 
 """"@user_is_professor
@@ -56,7 +56,7 @@ def exportCSV(request, pk):
 
     lesson = get_object_or_404(Lesson, pk=pk)
     students = Student.objects.filter(lesson=lesson)
-    
+
     writer = csv.writer(response)
     writer.writerow(['Username', 'First name', 'Last name', 'Email address'])
     # add pk, so be able to get which lesson
@@ -611,6 +611,94 @@ def lesson_test_list(request, pk):
         "all_tests": lesson.basetest_set.order_by('-created_at'),
     })
 
+@user_is_professor
+def lesson_competences_update(request, pk):
+    """
+    Query to update competences of a chosen Lesson or display form to update.
+
+    :param request:
+    :param pk: primary key of a Lesson
+    :return:
+    """
+
+    if request.method == "POST":
+        #form = CompetencesUpdateForm(request.POST) #TODO Use Django forms to validate and fetch data.
+
+        competences_students = request.POST.getlist('competences_students')
+        competences_skills   = request.POST.getlist('competences_skills')
+        skill1 = None
+        skill2 = None
+        skill3 = None
+        if len(competences_skills) == 1:
+            [skill1] = competences_skills
+            skill1 = Skill.objects.get(code=skill1)
+        elif len(competences_skills) == 2:
+            [skill1, skill2] = competences_skills
+            skill1 = Skill.objects.get(code=skill1)
+            skill2 = Skill.objects.get(code=skill2)
+        elif len(competences_skills) == 3:
+            [skill1, skill2, skill3] = competences_skills
+            skill1 = Skill.objects.get(code=skill1)
+            skill2 = Skill.objects.get(code=skill2)
+            skill3 = Skill.objects.get(code=skill3)
+        if len(competences_skills) <= 3:
+            for student_id in competences_students:
+                query_objectives = StudentSkill.objects.filter(student=student_id).select_related("skill").exclude(is_objective=None)
+                for student_skill in query_objectives:  # Remove old objectives
+                    if student_skill.skill.code not in competences_skills:
+                        remove_objective_student_skill(request, pk, student_skill.id)
+                query_stud_skills = StudentSkill.objects.filter(Q(student=student_id) & (Q(skill=skill1) | Q(skill=skill2) | Q(skill=skill3))).select_related("skill")
+                for stud_skill in query_stud_skills:
+                    set_objective_student_skill(request, pk, stud_skill.id)
+        else: # TODO warning message
+            pass
+
+    lesson = get_object_or_404(Lesson, pk=pk)
+
+    number_of_students = lesson.students.count()
+
+    skill_to_student_skill = {}
+    for student_skill in StudentSkill.objects.filter(student__lesson=lesson).select_related("skill"):
+        skill_to_student_skill.setdefault(student_skill.skill, list()).append(student_skill)
+
+    skills_to_heatmap_class = {}
+
+    if lesson.students.count():
+        try:
+            skills = []
+            for stage in lesson.stages_in_unchronological_order():
+                skills.extend([x for x in stage.skills.all().order_by('-code')])
+
+            for skill in skills:
+                mastered = len([x for x in skill_to_student_skill[skill] if x.acquired])
+                not_mastered = len([x for x in skill_to_student_skill[skill] if not x.acquired and x.tested])
+                total = mastered + not_mastered
+
+                # normally number_of_students will never be equal to 0 in this loop
+                if total == 0:
+                    skill.heatmap_class = "mastered_not_enough"
+                    continue
+
+                percentage = (float(mastered) / total) if total else 0
+
+                if percentage < 0.25:
+                    skills_to_heatmap_class[skill] = "mastered_25"
+                elif percentage < 0.5:
+                    skills_to_heatmap_class[skill] = "mastered_50"
+                elif percentage < 0.75:
+                    skills_to_heatmap_class[skill] = "mastered_75"
+                else:
+                    skills_to_heatmap_class[skill] = "mastered_100"
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            print e
+            print "Error: could no calculate heatmap"
+
+    return render(request, "professor/lesson/competences/update.haml", {
+        "lesson": lesson,
+        "number_of_students": number_of_students,
+        "skills_to_heatmap_class": skills_to_heatmap_class,
+    })
 
 @user_is_professor
 def lesson_test_add(request, pk):

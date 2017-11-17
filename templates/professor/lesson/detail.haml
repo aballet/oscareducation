@@ -34,6 +34,16 @@
     %li{role: "presentation"}
       %a{href: "#heatmap"}
         Vue globale de la classe
+<<<<<<< HEAD
+=======
+    %li.active{role: "presentation"}
+      %a.real-link{href: "{% url 'professor:lesson_competences_update' lesson.pk %}"}
+        Compétences        
+    %li{role: "presentation"}
+      %a.real-link{href: "{% url 'stats:viewstats' lesson.pk %}"}
+        Statistiques
+
+>>>>>>> Set Competences For All Class
 
   .tab-content
     #students.tab-pane.active

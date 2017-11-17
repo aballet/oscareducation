@@ -1,0 +1,131 @@
+-extends "professor/skill/detail.haml"
+-load static
+-load lesson_tags
+-load student_tags
+
+-block content
+  %h3
+    =lesson.name
+    .pull-right
+      %a{href: "{% url 'professor:lesson_update' lesson.pk %}"}
+        %img.icon{src: "{% static 'img/icons/modify.png' %}", data-toggle: "tooltip", data-placement: "top", title: "modifier"}
+      %a{href: "{% url 'professor:lesson_delete' lesson.pk %}"}
+        %img.icon{src: "{% static 'img/icons/delete.png' %}", data-toggle: "tooltip", data-placement: "top", title: "supprimer"}
+  %hr
+
+  %ul.menu-tabs.nav.orange.nav-tabs
+    %li.active{role: "presentation"}
+      %a.real-link{href: "{% url 'professor:lesson_detail' lesson.pk %}#students"}
+        Mes élèves
+    %li{role: "presentation"}
+      %a.real-link{href: "{% url 'professor:lesson_test_list' lesson.pk %}"}
+        Mes Tests
+    %li{role: "presentation"}
+      %a.real-link{href: "{% url 'professor:lesson_detail' lesson.pk %}#heatmap"}
+        Vue globale de la classe
+    %li{role: "presentation"}
+      %a.real-link{href: "{% url 'professor:lesson_competences_update' lesson.pk %}"}
+        Competences
+    %li{role: "presentation"}
+      %a.real-link{href: "{% url 'stats:viewstats' lesson.pk %}"}
+        Statistiques
+
+  .ligneorange
+  .tab-content
+    .boxclasse.container-fluid
+      -if lesson.students.count
+        %form.form{action:"", method:"POST"}
+          %table#studentsTableList.table.table-bordred.table-striped
+            %thead
+              %th
+                %input#checkall{:type => "checkbox"}/
+              %th Nom
+              %th Compétence 1
+              %th Compétence 2
+              %th Compétence 3
+            %tbody
+              -csrf_token
+              .form-group
+                -for student in lesson.students.all
+                  -get_student_target_skills of student at lesson.stages_in_unchronological_order.0 rename "list_target_skills"
+                    %tr
+                      %td
+                        %input.checkthis{value:"{{student.id}}", name:"competences_students",type:"checkbox"}/
+                      %td
+                        %a{href: "{% url 'professor:lesson_student_detail' lesson.pk student.pk %}"}= student
+                      %td
+                        %span{data-toggle:"tooltip", data-placement:"right", title:"{{list_target_skills.0.skill.name}}"}
+                          {{list_target_skills.0.skill.name}}
+                      %td
+                        %span{data-toggle:"tooltip", data-placement:"right", title:"{{list_target_skills.1.skill.name}}"}
+                          {{list_target_skills.1.skill.name}}
+                      %td
+                        %span{data-toggle:"tooltip", data-placement:"right", title:"{{list_target_skills.2.skill.name}}"}
+                          {{list_target_skills.2.skill.name}}
+         .ligneorangefine
+         .form-group
+                -if number_of_students >= 2
+                  #accordion.panel-group{role: "tablist", aria-multiselectable: "true"}
+                    -for stage in lesson.stages_in_unchronological_order
+                      .panel.panel-default
+                        .panel-heading{role: "tab", id: "heading{{ stage.name|slugify }}"}
+                          %h4.panel-title
+                            %a{role: "button", data-toggle: "collapse", data-parent: "#accordion", href: "#collapse{{ stage.name|slugify }}", aria-expanded: "{% if forloop.counter == 1 %}true{% else %}false{% endif %}", aria-controls: "collapse{{ stage.name|slugify }}"}
+                              Niveau {{ stage.name }}
+
+                        -regroup stage.skills_by_id by section as sections
+
+                        .panel-collapse.collapse{id: "collapse{{ stage.name|slugify }}", role: "tabpanel", aria-labelledby: "heading{{ stage.name|slugify }}", class: "{% if forloop.counter == 1 %}in{% endif %}"}
+                          .panel-body
+                            -for section in sections
+                              %h5= section.grouper
+                              %ul.heatmap-list#studentsSkillsTableList
+                                -for skill in section.list
+                                  %li
+                                    %input.checkthis{value:"{{skill.code}}", name:"competences_skills", type:"checkbox"}/
+                                    %a.btn.btn-default.skill{type: "button", class: "{% get_skill_heatmap_class skills_to_heatmap_class skill %}", href: "{% url 'professor:lesson_skill_detail' lesson.pk skill.code %}"}
+                                      %abbr{title: "{{ skill.name }}", style: "cursor: default; border: none"}= skill.code
+                                    =skill.name
+         .ligneorangefine
+         .form-group
+            %button.btn.btn-primary{type: "submit",style: "float: right; width: 100px; padding: 10px; margin: 10px;"}
+              Définir
+
+      -else
+        %p
+          %i
+            Vous n'avez pas encore d'élèves dans cette classe.
+
+      :javascript
+        $(document).ready(function(){
+        $("#studentsTableList #checkall").click(function () {
+                if ($("#studentsTableList #checkall").is(':checked')) {
+                    $("#studentsTableList input[type=checkbox]").each(function () {
+                        $(this).prop("checked", true);
+                    });
+
+                } else {
+                    $("#studentsTableList input[type=checkbox]").each(function () {
+                        $(this).prop("checked", false);
+                    });
+                }
+            });
+
+            $("[data-toggle=tooltip]").tooltip();
+        });
+
+        $("#studentsSkillsTableList input[type=checkbox]").change(function(){
+            var checkgroup=document.getElementsByName("competences_skills");
+            var limit=3;
+            for (var i=0; i<checkgroup.length; i++){
+                checkgroup[i].onclick=function(){
+                var checkedcount=0
+                for (var i=0; i<checkgroup.length; i++)
+                    checkedcount+=(checkgroup[i].checked)? 1 : 0
+                if (checkedcount>limit){
+                    alert("Vous pouvez choisir un maximum de "+limit+" compétences")
+                    this.checked=false
+                    }
+                }
+            }
+        });

@@ -132,7 +132,7 @@
 
         #recommendedSkills.tab-pane
           -if student.has_recommended_skills
-            %table.table
+            %table.table.sorted_table
               -for stage in lesson.stages_in_unchronological_order
                 -get_students_skills of student at stage rename "student_skills"
                 -for student_skill in student_skills
@@ -213,3 +213,9 @@
           $('.nav-tabs a[href="' + hash + '"]').tab('show');
       }
     })
+    $('.sorted_table').sortable({
+       containerSelector: 'table',
+       itemPath: '> tbody',
+       itemSelector: 'tr',
+       placeholder: '<tr class="placeholder"/>'
+       });

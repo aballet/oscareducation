@@ -382,7 +382,7 @@ class StudentSkill(models.Model):
     def cant_add_objective(self):
         req = StudentSkill.objects.filter(student=self.student)
         list_objectives = req.exclude(is_objective = None)
-        print(list_objectives.count())
+        #print(list_objectives.count())
         if list_objectives.count() >= 3:
             return True
         return False
@@ -524,8 +524,8 @@ class StudentSkill(models.Model):
 
     @staticmethod
     def __depth_sort_skills__(list_obj):
-        print("LIST OBJECTIFS")
-        print(list_obj)
+        #print("LIST OBJECTIFS")
+        #print(list_obj)
 
         list_level = [[]]
         list_acquired = []
@@ -559,7 +559,7 @@ class StudentSkill(models.Model):
         for std_skill_objective in list_obj:
             recursive(std_skill_objective)
 
-        print(list_level)
+        #print(list_level)
         list_level.insert(0, list_acquired)
         if len(list_level) == 1 and len(list_level[0]) == 0:  # Empty list
             return []

@@ -108,7 +108,7 @@ WSGI_APPLICATION = 'oscar.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'test_oscar',
+        'NAME': 'oscar',
         'USER': 'oscar',
         'PASSWORD': 'oscar',
         'HOST': 'localhost',

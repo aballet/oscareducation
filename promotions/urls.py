@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^lesson/(?P<lesson_pk>\d+)/student/(?P<pk>\d+)/test/(?P<test_pk>\d+?)/$', views.lesson_student_test_detail, name='lesson_student_test'),
 
     url(r'^lesson/(?P<pk>\d+)/test/$', views.lesson_test_list, name='lesson_test_list'),
+    url(r'^lesson/(?P<pk>\d+)/competences/$', views.lesson_competences_update, name='lesson_competences_update'),
     url(r'^lesson/(?P<pk>\d+)/test/add/$', views.lesson_test_add, name='lesson_test_add'),
     url(r'^lesson/(?P<lesson_pk>\d+)/test/(?P<pk>\d+)/update/$', views.lesson_test_update, name='lesson_test_update'),
     url(r'^lesson/(?P<lesson_pk>\d+)/test/(?P<pk>\d+)/delete/$', user_is_professor(BaseTestDelete.as_view()), name='lesson_test_delete'),
