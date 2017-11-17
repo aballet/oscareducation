@@ -85,6 +85,19 @@ class TestUpdateForm(forms.ModelForm):
         model = BaseTest
         fields = ['name']
 
+class CompetencesUpdateForm(forms.Form):
+   # TODO Correct the implementation
+    competences_students = forms.ModelMultipleChoiceField(
+        label="competences_students",
+        queryset = User.objects.filter(),
+        widget  = forms.CheckboxSelectMultiple,
+    )
+
+    competences_skills = forms.ModelMultipleChoiceField(
+        label="competences_skills",
+        queryset = User.objects.all(),
+        widget  = forms.CheckboxSelectMultiple,
+    )
 
 class KhanAcademyForm(forms.Form):
 
