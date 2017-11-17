@@ -406,13 +406,6 @@ class StudentSkill(models.Model):
 
         return False
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['student', 'skill'])
-        ]
-
-        #return False
-
     @staticmethod
     def __depth_sort_skills__(list_obj):
         #print("LIST OBJECTIFS")
