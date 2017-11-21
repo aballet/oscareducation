@@ -14,6 +14,7 @@ def get_students_skills(context, of_keyword, student, at_keyword, stage, as_keyw
 def go_next_line(context, as_keyword, target_name):
     context[target_name] = StudentSkill.__next_line__()
     return ""
+
 @register.simple_tag(takes_context=True)
 def reset_counter_line(context):
     StudentSkill.__reset_counter_line__()
@@ -24,7 +25,7 @@ def reset_counter_line(context):
 def get_depth_sorted_students_skills(context, of_keyword, student, at_keyword, stage, as_keyword, target_name):
     set = StudentSkill.objects.filter(skill__in=stage.skills.all(), student=student)
     remove = set.exclude(is_objective = None)
-    context[target_name] = StudentSkill.__depth_sort_skills__(remove)
+    context[target_name] = StudentSkill.__depth_sort_skills__(remove,student)
     return ""
 
 @register.simple_tag(takes_context=True)
@@ -35,6 +36,11 @@ def get_student_target_skills(context, of_keyword, student, at_keyword, stage, a
         if student_skill.is_objective:
          list_target_skills.append(student_skill)
     context[target_name] = list_target_skills
+    return ""
+
+@register.simple_tag(takes_context=True)
+def get_first_stage_tag(context, of_keyword, lesson, as_keyword, target_name):
+    context[target_name] = lesson.get_first_stage()
     return ""
 
 @register.simple_tag

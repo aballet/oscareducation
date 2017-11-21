@@ -66,3 +66,6 @@ class Lesson(models.Model):
             stages.append(stage)
 
         return stages
+
+    def get_first_stage(self):
+        return self.stage
