@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import random
+from operator import attrgetter
+
 from django.db import models
 from datetime import datetime
 
@@ -599,15 +601,34 @@ class StudentSkill(models.Model):
         for std_skill_objective in list_obj:
             recursive(std_skill_objective)
 
-        # sort_criterion = self.get_order_sort()
-        sorted(list_std_skill, key=lambda student_skill: student_skill.sort_high)
+        sort_criterion = getOrderSort()
+        criterion1 = sort_criterion[0][0]
+        list_std_skill = sorted(list_std_skill, key=lambda student_skill: getattr(student_skill,criterion1))
+        prevList = []
+        level_List = []
+
+        for std_skill in list_std_skill:
+            if prevList == []:
+                prevList.append(std_skill)
+            else:
+                if getattr(std_skill,criterion1) == getattr(prevList[0],criterion1):
+                    prevList.append(std_skill)
+                else:
+                    level_List.append(prevList)
+                    prevList = [std_skill]
+
+        level_List.append(prevList)
+        for sublist in level_List:
+            sublist.sort(key=lambda student_skill: getattr(student_skill,sort_criterion[1][0]))
+
+
 
         list_level.insert(0, list_acquired)
 
         if len(list_level) == 2 and len(list_level[0]) == 0:  # Empty list
             return None
         else:
-            return list_level
+            return level_List
 
     global var
     var = 3
@@ -620,7 +641,6 @@ class StudentSkill(models.Model):
             return True
         global var
         var = var - 1
-        print(var)
         return False
 
     @staticmethod
@@ -638,9 +658,14 @@ class Sort(models.Model):
 
 def getOrderSort():
     sortOrder =[]
-    q_set_r = Sort.objects.filter(Q(name="DepthSort") | Q(name="SectionSort") | Q(name="DurationSort"))
-    print q_set_r
+    q_set_r = Sort.objects.filter(Q(name="Sort by number of unvalidated prerequisites") | Q(name="Sort by section name") | Q(name="Sort by time to make the exercice"))
     for sort in q_set_r:
-        sortOrder.append((sort.name,sort.weight))
+        if sort.name == "Sort by number of unvalidated prerequisites":
+            sortOrder.append(("sort_high",sort.weight))
+        elif sort.name == "Sort by section name":
+            sortOrder.append(("sort_section_name", sort.weight))
+        else:
+            sortOrder.append(("sort_time", sort.weight))
     sortOrder.sort(key=lambda tup: tup[1], reverse=True)
+    return sortOrder
     #print sortOrder
