@@ -48,6 +48,8 @@ class Skill(models.Model):
     modified_by = models.ForeignKey(User, null=True)
     """The last user that modified this Skill"""
 
+    time_skill = models.IntegerField(default=0, null=True)
+
     relations = models.ManyToManyField("self", through="Relations", related_name="related_to", symmetrical=False)
     """ Make relation between skills through a relation Model with a strict options : depended_on , similar_to  and identic_to """
 
@@ -222,8 +224,14 @@ class StudentSkill(models.Model):
     """When the Skill was set as objective"""
     is_recommended = models.DateField(default=None, null=True)
     """When the Skill was set as recommended"""
-    # bad: doesn't support regression
 
+    sort_high = models.IntegerField(default = 0, null=True)
+    sort_section_name = models.CharField(max_length=255, null=True)
+    sort_time = models.IntegerField(default = 0, null=True)
+
+
+    def reset_sort_variables(self):
+        pass
 
     def __unicode__(self):
         return u"%s - %s - %s" % (
@@ -288,6 +296,13 @@ class StudentSkill(models.Model):
     def __eq__(self, other):
         return self.skill.code == other.skill.code
 
+
+    def __le__(self,other):
+        pass
+
+    def __ge__(self,other):
+        pass
+
     def unvalidate(self, who, reason, reason_object):
         """Invalidates a Skill (change its status to "not acquired")"""
 
@@ -301,6 +316,8 @@ class StudentSkill(models.Model):
                 reason_object=reason_object,
             )
 
+            student_skill.sort_time = self.skill.time_skill
+            student_skill.sort_section_name = self.skill.section.name
             student_skill.acquired = None
             student_skill.tested = datetime.now()
             student_skill.save()
@@ -319,6 +336,8 @@ class StudentSkill(models.Model):
         )
         self.acquired = None
         self.tested = datetime.now()
+        self.sort_time = self.skill.time_skill
+        self.sort_section_name = self.skill.section.name
         self.save()
 
     def default(self, who, reason, reason_object):
@@ -335,6 +354,8 @@ class StudentSkill(models.Model):
         self.acquired = None
         self.tested = None
         self.is_objective = None
+        self.sort_time = self.skill.time_skill
+        self.sort_section_name = self.skill.section.name
         self.save()
 
     def set_objective(self, who, reason, reason_object):
@@ -348,13 +369,18 @@ class StudentSkill(models.Model):
                 reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
                 reason_object=reason_object,
             )
+            student_skill.sort_time = self.skill.time_skill
+            student_skill.sort_section_name = self.skill.section.name
 
             if(not student_skill.acquired):
                 student_skill.is_recommended = datetime.now()
-                student_skill.save()
+
+            student_skill.save()
 
         self.is_objective = datetime.now()
         self.is_recommended = datetime.now()
+        self.sort_time = self.skill.time_skill
+        self.sort_section_name = self.skill.section.name
         self.save()
         self.go_down_visitor(recommend_student_skill)
 
@@ -513,12 +539,11 @@ class StudentSkill(models.Model):
         return False
 
     @staticmethod
-    def __depth_sort_skills__(list_obj):
-        #print("LIST OBJECTIFS")
-        #print(list_obj)
-
+    def __depth_sort_skills__(list_obj, current_stud):
         list_level = [[]]
         list_acquired = []
+        list_std_skill = []
+
         def recursive(std_skill):
             q_set_r = StudentSkill.objects.filter(skill__in=std_skill.skill.get_prerequisites_skills(), student=std_skill.student)# acquired = None)  # Set of StudentSkill children not yet acquired
             q_set = q_set_r.filter(acquired = None) #skills not acquired
@@ -528,11 +553,16 @@ class StudentSkill(models.Model):
             for elem in q_set_acq:
                 if elem not in list_acquired:
                     list_acquired.append(elem)
+                    std_skill.sort_high = -1
+                    std_skill.save()
 
             # if the QuerySet is empty
             if q_set.count() == 0:
                 if std_skill not in list_level[0]:
                     list_level[0].append(std_skill)
+                    list_std_skill.append(std_skill)
+                    std_skill.sort_high = 0
+                    std_skill.save()
                 return 1
             else:
                 result = 0
@@ -544,15 +574,38 @@ class StudentSkill(models.Model):
                     list_level.append([])
                 if std_skill not in list_level[result]:
                     list_level[result].append(std_skill)
+                    list_std_skill.append(std_skill)
+                    std_skill.sort_high = result
+                    std_skill.save()
                 return result+1
+
+        '''if(len(list_obj) == 0):
+            q_set_r = StudentSkill.objects.filter(student=current_stud)
+            ToReturn = [[]]
+            for stud_skill in q_set_r:
+                q_set_pre = StudentSkill.objects.filter(skill__in=stud_skill.skill.get_prerequisites_skills())
+                if len(q_set_pre) == 0:
+                    ToReturn[0].append(stud_skill)
+                else:
+                    to_take = True
+                    for std_skill  in q_set_pre:
+                        if std_skill.acquired == None:
+                            to_take = False
+                    if to_take and stud_skill not in ToReturn :
+                        ToReturn[0].append(stud_skill)
+            return ToReturn'''
+
 
         for std_skill_objective in list_obj:
             recursive(std_skill_objective)
 
-        #print(list_level)
+        # sort_criterion = self.get_order_sort()
+        sorted(list_std_skill, key=lambda student_skill: student_skill.sort_high)
+
         list_level.insert(0, list_acquired)
-        if len(list_level) == 1 and len(list_level[0]) == 0:  # Empty list
-            return []
+
+        if len(list_level) == 2 and len(list_level[0]) == 0:  # Empty list
+            return None
         else:
             return list_level
 
@@ -563,16 +616,17 @@ class StudentSkill(models.Model):
     def __next_line__():
         if var == 0:
             global  var
-            var = random.randint(2, 3)
+            var = random.randint(1,2)
             return True
         global var
         var = var - 1
+        print(var)
         return False
 
     @staticmethod
     def __reset_counter_line__():
         global var
-        var = random.randint(2,3)
+        var = random.randint(1,2)
 
 class Sort(models.Model):
     name = models.TextField(null=True, blank=True)
