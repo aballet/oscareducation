@@ -14,7 +14,7 @@
   %hr
 
   %ul.menu-tabs.nav.orange.nav-tabs
-    %li.active{role: "presentation"}
+    %li{role: "presentation"}
       %a.real-link{href: "{% url 'professor:lesson_detail' lesson.pk %}#students"}
         Mes élèves
     %li{role: "presentation"}
@@ -23,7 +23,7 @@
     %li{role: "presentation"}
       %a.real-link{href: "{% url 'professor:lesson_detail' lesson.pk %}#heatmap"}
         Vue globale de la classe
-    %li{role: "presentation"}
+    %li.active{role: "presentation"}
       %a.real-link{href: "{% url 'professor:lesson_competences_update' lesson.pk %}"}
         Competences
     %li{role: "presentation"}
