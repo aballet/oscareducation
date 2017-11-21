@@ -573,3 +573,4 @@ class StudentSkill(models.Model):
     def __reset_counter_line__():
         global var
         var = random.randint(2, 3)
+
