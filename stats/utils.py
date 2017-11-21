@@ -49,7 +49,7 @@ def add_skill_acquired_by_student(student, skill_id):
     new_entry.save()
 
 
-def add_authentication_by_student(student, end_date):
+def add_authentication_by_student(user, end_date):
     """
     Each time a student logs in we use this method to add the field in the table AuthenticationStudent
 
@@ -59,6 +59,7 @@ def add_authentication_by_student(student, end_date):
     end_date -- date object in the same form as datetime.datetime, which times the end of the session
 
     """
+    student = Student.objects.filter(user=user)[0]
     new_entry = models.AuthenticationStudent(student=student, end_of_session=end_date)
     new_entry.save()
 

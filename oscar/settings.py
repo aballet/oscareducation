@@ -113,14 +113,6 @@ DATABASES = {
         'PASSWORD': 'oscar',
         'HOST': 'localhost',
         'PORT': '5432',
-    },
-    'test_db': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'test_oscar',
-        'USER': 'oscar',
-        'PASSWORD': 'oscar',
-        'HOST': 'localhost',
-        'PORT': '5432',
     }
 }
 

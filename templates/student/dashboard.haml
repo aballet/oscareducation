@@ -48,7 +48,6 @@
                       %span{style:'float:right;'}
                         %a{href: '{% url "student_skill_pedagogic_ressources" "section" section.grouper.id %}'}
                           %img.icon{src: "{% static 'img/icons/ressource-white.png' %}", title: "Accéder aux ressources du chapitre" }
-
                 %table.table-hover.table
                   -for student_skill in section.list
                     %tr.legend-list
@@ -65,15 +64,12 @@
                       %td.legend
                         %a{href: '{% url "student_skill_pedagogic_ressources" "skill" student_skill.skill.code %}'}
                           {{ student_skill.skill.name }}
-
             %br
           -else
             -if forloop.counter == 2
               .container-fluid.boxclassetitle
                 %h5 Années précédentes
-
               .ligneorangefine
-
               <div class="container-fluid boxclasse">
             .panel.panel-default
               .panel-heading
@@ -88,15 +84,11 @@
                     %td{style: "text-align: center; width: 100px; padding: 10px;"}
                       %a{type: "button", style: '{% if student_skill.tested or student_skill.acquired %}color: white;{% endif %}; width: 100%{% if student_skill.recommended_to_learn %}; border: black solid;{% endif %}', href: '{% url "student_skill_pedagogic_ressources" "skill" student_skill.skill.code %}', class: "btn btn-{% if student_skill.acquired %}success{% elif student_skill.tested %}warning{% else %}default{% endif %} skill"}
                         %i{class: "fa fa-{{ student_skill.skill.image }}", title: "{{ student_skill.skill.name }}"}
-
                     -if forloop.last
                       </tr>
             -if forloop.last
               </div>
-
-
         %h5 Légende
-
         .row
           .col-md-6
             %ul.legend-list
@@ -130,19 +122,14 @@
                 .btn.btn-default.right-space
                   %i.fa.fa-gears
                 compétences transversales
-
       .col-md-6
         -if user.student.has_recommended_skills
           .container-fluid.boxclassetitle
             %h5 Compétences recommandées
-
           .ligneorangefine
-
           .container-fluid.boxclasse
            %br
-
             #skillsList{:style => "height:400px;overflow-y: scroll; text-align: center;"}
-
               -for stage in lesson.stages_in_unchronological_order
                 -get_depth_sorted_students_skills of user.student at stage rename "student_skills"
                 -for level in student_skills
@@ -150,30 +137,20 @@
                       -go_next_line rename "is_next_line"
                       -if is_next_line
                         %br
-
-
                       %span
                       %a{href: '{% url "student_skill_pedagogic_ressources" "skill" student_skill.skill.code %}'}
                         %button.btn.round-section-icon.recommended{class: "fa fa-{{ student_skill.skill.image }}", title: "{{ student_skill.skill.name }}", data-toggle: "tooltip", data-placement: "right", section: "{{ student_skill.skill.section }}"}{:type => "button",:style => 'width: 100px; height: 100px; padding: 10px 0px 10px 0px; margin: 20px; font-size: 16px; line-height: 1.33; border-radius: 100px;{% if student_skill.acquired %}background-color:green; border: green solid;{% elif student_skill.is_objective %}background-color:blue; border: blue solid;{% elif student_skill.recommended_to_learn %}background-color:orange; border: orange solid;{% endif %}'}
                           {{ student_skill.skill.code }}
                     .ligneorangefine
                     -reset_counter_line
-
-
            %br
-
-
         -if user.student.teststudent_set.all|keep_unfinished_tests|remove_closed_tests
           -if user.student.has_recommended_skills
             %br
-
           .container-fluid.boxclassetitle
             %h5 Test{{ user.student.teststudent_set.all|keep_unfinished_tests|pluralize }} à passer
-
           .ligneorangefine
-
           .container-fluid.boxclasse
-
             .list-group
               -for student_test in user.student.teststudent_set.all|keep_unfinished_tests|remove_closed_tests
                 -if not student_test.finished
