@@ -467,3 +467,20 @@ class StudentSkill(models.Model):
     def __reset_counter_line__():
         global var
         var = random.randint(2,3)
+
+class Sort(models.Model):
+    name = models.TextField(null=True, blank=True)
+    weight = models.PositiveIntegerField(null=True)
+
+    def __unicode__(self):
+        return "%s" % (
+        self.name)
+
+def getOrderSort():
+    sortOrder =[]
+    q_set_r = Sort.objects.filter(Q(name="DepthSort") | Q(name="SectionSort") | Q(name="DurationSort"))
+    print q_set_r
+    for sort in q_set_r:
+        sortOrder.append((sort.name,sort.weight))
+    sortOrder.sort(key=lambda tup: tup[1], reverse=True)
+    #print sortOrder
