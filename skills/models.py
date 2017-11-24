@@ -514,9 +514,7 @@ class StudentSkill(models.Model):
 
         level_List.append(prevList)
         for sublist in level_List:
-            sublist.sort(key=lambda student_skill: getattr(student_skill,sort_criterion[1][0]))
-
-
+            sublist.sort(key=lambda student_skill: (getattr(student_skill,sort_criterion[1][0]),getattr(student_skill,sort_criterion[2][0])))
 
         list_level.insert(0, list_acquired)
 
@@ -530,9 +528,10 @@ class StudentSkill(models.Model):
 
     @staticmethod
     def __next_line__():
+        print(var)
         if var == 0:
             global  var
-            var = random.randint(1,2)
+            var = random.randint(0,2)
             return True
         global var
         var = var - 1
@@ -541,8 +540,8 @@ class StudentSkill(models.Model):
     @staticmethod
     def __reset_counter_line__():
         global var
-
-        var = random.randint(1,2)
+        var = random.randint(0,2)
+        print("new var %d"%(var))
 
 
 class Sort(models.Model):
