@@ -372,8 +372,8 @@ class StudentSkill(models.Model):
                 reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
                 reason_object=reason_object,
             )
-            student_skill.sort_time = self.skill.time_skill
-            student_skill.sort_section_name = self.skill.section.name
+            student_skill.sort_time = student_skill.skill.time_skill
+            student_skill.sort_section_name = student_skill.skill.section.name
 
             if(not student_skill.acquired):
                 student_skill.is_recommended = datetime.now()
@@ -498,6 +498,7 @@ class StudentSkill(models.Model):
 
         sort_criterion = getOrderSort()
         criterion1 = sort_criterion[0][0]
+        print (criterion1)
         list_std_skill = sorted(list_std_skill, key=lambda student_skill: getattr(student_skill,criterion1))
         prevList = []
         level_List = []
@@ -514,8 +515,7 @@ class StudentSkill(models.Model):
 
         level_List.append(prevList)
         for sublist in level_List:
-            sublist.sort(key=lambda student_skill: (getattr(student_skill,sort_criterion[1][0]),getattr(student_skill,sort_criterion[2][0])))
-
+            sublist.sort(key=lambda student_skill: (getattr(student_skill,sort_criterion[1][0]), getattr(student_skill,sort_criterion[2][0])))
         list_level.insert(0, list_acquired)
 
         if len(list_level) == 2 and len(list_level[0]) == 0:  # Empty list
@@ -528,10 +528,9 @@ class StudentSkill(models.Model):
 
     @staticmethod
     def __next_line__():
-        print(var)
         if var == 0:
             global  var
-            var = random.randint(0,2)
+            var = random.randint(1,2)
             return True
         global var
         var = var - 1
@@ -540,14 +539,13 @@ class StudentSkill(models.Model):
     @staticmethod
     def __reset_counter_line__():
         global var
-        var = random.randint(0,2)
-        print("new var %d"%(var))
+        var = random.randint(1,2)
 
 
 SORT_CHOICES = (
-    (0, "First"),
+    (2, "First"),
     (1, "Second"),
-    (2, "Third")
+    (0, "Third")
 )
 
 class Sort(models.Model):
@@ -557,11 +555,11 @@ class Sort(models.Model):
     def __unicode__(self):
         sortOrder = None;
         if self.weight == 0 :
-            sortOrder = "First"
+            sortOrder = "Third"
         elif self.weight == 1:
             sortOrder = "Second"
         else:
-            sortOrder = "Third"
+            sortOrder = "First"
         return "{0} : {1}".format(self.name, sortOrder)
 
 def getOrderSort():
