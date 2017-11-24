@@ -545,13 +545,25 @@ class StudentSkill(models.Model):
         var = random.randint(1,2)
 
 
+SORT_CHOICES = (
+    (0, "First"),
+    (1, "Second"),
+    (2, "Third")
+)
+
 class Sort(models.Model):
-    name = models.TextField(null=True, blank=True)
-    weight = models.PositiveIntegerField(null=True)
+    name      = models.TextField(null=False, editable = False)
+    weight    = models.IntegerField(choices=SORT_CHOICES, default=1)
 
     def __unicode__(self):
-        return "%s" % (
-        self.name)
+        sortOrder = None;
+        if self.weight == 0 :
+            sortOrder = "First"
+        elif self.weight == 1:
+            sortOrder = "Second"
+        else:
+            sortOrder = "Third"
+        return "{0} : {1}".format(self.name, sortOrder)
 
 def getOrderSort():
     sortOrder =[]
