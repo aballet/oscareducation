@@ -209,7 +209,8 @@ class SkillHistory(models.Model):
     class Meta:
         ordering = ['datetime']
 
-var = 2
+
+VAR = 2
 
 class StudentSkill(models.Model):
     """
@@ -479,92 +480,98 @@ class StudentSkill(models.Model):
     @staticmethod
     def __depth_sort_skills__(list_obj, current_stud):
 
-        list_level = [[]]
-        list_acquired = [] # list of acquired skills
         list_std_skill = []
 
         def recursive(std_skill):
-            """ travel the tree from the top (std_skill) to the bottom (leaves) recursively"""
+            """ travel the tree from the top (std_skill) to the bottom (leaves) recursively and update the high of the skills (high = level in the prerequisites tree """
 
             q_set_r = StudentSkill.objects.filter(skill__in=std_skill.skill.get_prerequisites_skills(), student=std_skill.student) # get all the direct prequisites of std_skill
             q_set = q_set_r.filter(acquired = None) # skills not acquired
-            q_set_acq = q_set_r.exclude(acquired = None) # skills acquired
 
-            # Puts every acquired item in list_acquired
-            for elem in q_set_acq:
-                if elem not in list_acquired: # avoid duplicate
-                    list_acquired.append(elem)
-                    std_skill.sort_high = -1 # acquired skills have a default high of -1 in the tree
-                    std_skill.save()
-
-            # if q_set is empty (no prerequisites unacquired), std_skill is a lead (level 0)
+            # if q_set is empty (no prerequisites unacquired), std_skill is a leaf (level 0)
             if q_set.count() == 0:
-                if std_skill not in list_level[0]:
-                    list_level[0].append(std_skill)
+                if std_skill not in list_std_skill:
                     list_std_skill.append(std_skill)
                     std_skill.sort_high = 0
                     std_skill.save()
                 return 1
-            else:
+            else: # else std_skill has prerequisite which have to be visited
                 result = 0
-                for e in q_set:
+                for e in q_set: # visit all the children skills
                     a = recursive(e)
                     if a > result:
                         result = a
-                if len(list_level) <= result:
-                    list_level.append([])
-                if std_skill not in list_level[result]:
-                    list_level[result].append(std_skill)
+
+                if std_skill not in list_std_skill: # set the high of std_skill in the prerequisite tree (high(std_skill) = max(high(children_of_std_skill))+1
                     list_std_skill.append(std_skill)
                     std_skill.sort_high = result
                     std_skill.save()
+
                 return result+1
 
+        # For each objective, travel recursively its prerequisites tree and extend list_std_skill
         for std_skill_objective in list_obj:
             recursive(std_skill_objective)
 
-        sort_criterion = getOrderSort()
+
+        sort_criterion = getOrderSort() # list of criterion ordered
+
+
+        # sort according to the first sort criteria
         criterion1 = sort_criterion[0][0]
         list_std_skill = sorted(list_std_skill, key=lambda student_skill: getattr(student_skill,criterion1))
-        prevList = []
-        level_List = []
+        prev_list = []
+        level_list = []
 
+        # create the different level
         for std_skill in list_std_skill:
-            if prevList == []:
-                prevList.append(std_skill)
+            if prev_list == []:
+                prev_list.append(std_skill)
             else:
-                if getattr(std_skill,criterion1) == getattr(prevList[0],criterion1):
-                    prevList.append(std_skill)
+                if getattr(std_skill,criterion1) == getattr(prev_list[0],criterion1):
+                    prev_list.append(std_skill)
                 else:
-                    level_List.append(prevList)
-                    prevList = [std_skill]
+                    level_list.append(prev_list)
+                    prev_list = [std_skill]
 
-        level_List.append(prevList)
-        for sublist in level_List:
+        level_list.append(prev_list)
+
+        # sort each sublist according to the second and third criterion
+        for sublist in level_list:
             sublist.sort(key=lambda student_skill: (getattr(student_skill,sort_criterion[1][0]), getattr(student_skill,sort_criterion[2][0])))
-        list_level.insert(0, list_acquired)
 
-        if len(list_level) == 2 and len(list_level[0]) == 0:  # Empty list
+
+        # get acquired skills and put in the first level of level_list
+        q_acquired = StudentSkill.objects.filter(student = current_stud).exclude(acquired = None)
+        list_acquired = []
+        for e in q_acquired:
+            list_acquired.append(e)
+
+        level_list.insert(0, list_acquired)
+
+
+        if len(level_list) == 2 and len(level_list[0]) == 0 and len(level_list[1]) == 0:  # if empty list return none
             return None
         else:
-            return level_List
+            return level_list
 
     @staticmethod
     def __next_line__():
         """ Decide when to go to the next line """
-        if var == 0:
-            global  var
-            var = random.randint(1,2)
+        if VAR == 0:
+            global VAR
+            VAR = random.randint(1,2)
             return True
-        global var
-        var = var - 1
+        global VAR
+        VAR = VAR - 1
         return False
 
     @staticmethod
     def __reset_counter_line__():
         """ resest the value of var after an orange line in the student interface"""
-        global var
-        var = random.randint(1,2)
+        global VAR
+        VAR = random.randint(1,2)
+
 
 SORT_CHOICES = (
     (2, "First"),
