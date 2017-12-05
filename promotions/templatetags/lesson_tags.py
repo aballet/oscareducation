@@ -31,11 +31,11 @@ def get_depth_sorted_students_skills(context, of_keyword, student, at_keyword, s
 @register.simple_tag(takes_context=True)
 def get_student_target_skills(context, of_keyword, student, at_keyword, stage, as_keyword, target_name):
     list_target_skills = []
-    student_skills = StudentSkill.objects.filter(skill__in=stage.skills.all(), student=student)
+    student_skills = StudentSkill.objects.filter(skill__in=stage.skills.all(), student=student).order_by("skill__code")
     for student_skill in student_skills:
         if student_skill.is_objective:
          list_target_skills.append(student_skill)
-    context[target_name] = list_target_skills
+    context[target_name] = sorted(list_target_skills)
     return ""
 
 @register.simple_tag(takes_context=True)
