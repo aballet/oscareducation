@@ -209,6 +209,7 @@ class SkillHistory(models.Model):
     class Meta:
         ordering = ['datetime']
 
+var = 2
 
 class StudentSkill(models.Model):
     """
@@ -226,14 +227,10 @@ class StudentSkill(models.Model):
     """When the Skill was set as objective"""
     is_recommended = models.DateField(default=None, null=True)
     """When the Skill was set as recommended"""
-
     sort_high = models.IntegerField(default = 0, null=True)
+    """ """
     sort_section_name = models.CharField(max_length=255, null=True)
     sort_time = models.IntegerField(default = 0, null=True)
-
-
-    def reset_sort_variables(self):
-        pass
 
     def __unicode__(self):
         return u"%s - %s - %s" % (
@@ -408,9 +405,9 @@ class StudentSkill(models.Model):
         self.go_down_visitor(not_recommend_student_skill)
 
     def cant_add_objective(self):
+        """ Check if the limit of objectives has been reached"""
         req = StudentSkill.objects.filter(student=self.student)
         list_objectives = req.exclude(is_objective = None)
-        #print(list_objectives.count())
         if list_objectives.count() >= 3:
             return True
         return False
@@ -477,88 +474,30 @@ class StudentSkill(models.Model):
         if self.is_objective or self.is_recommended:
             return True
 
-        """for skill in self.skill.get_prerequisites_skills():
-            skill = StudentSkill.objects.get(student=self.student, skill=skill)
-            if skill.is_objective:
-                return True"""
-        return False
-
-    @staticmethod
-    def __depth_sort_skills__(list_obj):
-        print("LIST OBJECTIFS")
-        print(list_obj)
-
-        list_level = [[]]
-        list_acquired = []
-        def recursive(std_skill):
-            q_set_r = StudentSkill.objects.filter(skill__in=std_skill.skill.get_prerequisites_skills(), student=std_skill.student)# acquired = None)  # Set of StudentSkill children not yet acquired
-            q_set = q_set_r.filter(acquired = None) #skills not acquired
-            q_set_acq = q_set_r.exclude(acquired = None) #skills acquired
-
-            # Puts every acquired item in list_acquired
-            for elem in q_set_acq:
-                if elem not in list_acquired:
-                    list_acquired.append(elem)
-
-            # if the QuerySet is empty
-            if q_set.count() == 0:
-                if std_skill not in list_level[0]:
-                    list_level[0].append(std_skill)
-                return 1
-            else:
-                result = 0
-                for e in q_set:
-                    a = recursive(e)
-                    if a > result:
-                        result = a
-                if len(list_level) <= result:
-                    list_level.append([])
-                if std_skill not in list_level[result]:
-                    list_level[result].append(std_skill)
-                return result+1
-
-        for std_skill_objective in list_obj:
-            recursive(std_skill_objective)
-
-        print(list_level)
-        list_level.insert(0, list_acquired)
-        if len(list_level) == 1 and len(list_level[0]) == 0:  # Empty list
-            return []
-        else:
-            return list_level
-
-    global var
-    var = 3
-
-    @staticmethod
-    def __next_line__():
-        if var == 0:
-            global  var
-            var = random.randint(2,3)
-            return True
-        global var
-        var = var - 1
         return False
 
     @staticmethod
     def __depth_sort_skills__(list_obj, current_stud):
+
         list_level = [[]]
-        list_acquired = []
+        list_acquired = [] # list of acquired skills
         list_std_skill = []
 
         def recursive(std_skill):
-            q_set_r = StudentSkill.objects.filter(skill__in=std_skill.skill.get_prerequisites_skills(), student=std_skill.student)# acquired = None)  # Set of StudentSkill children not yet acquired
-            q_set = q_set_r.filter(acquired = None) #skills not acquired
-            q_set_acq = q_set_r.exclude(acquired = None) #skills acquired
+            """ travel the tree from the top (std_skill) to the bottom (leaves) recursively"""
+
+            q_set_r = StudentSkill.objects.filter(skill__in=std_skill.skill.get_prerequisites_skills(), student=std_skill.student) # get all the direct prequisites of std_skill
+            q_set = q_set_r.filter(acquired = None) # skills not acquired
+            q_set_acq = q_set_r.exclude(acquired = None) # skills acquired
 
             # Puts every acquired item in list_acquired
             for elem in q_set_acq:
-                if elem not in list_acquired:
+                if elem not in list_acquired: # avoid duplicate
                     list_acquired.append(elem)
-                    std_skill.sort_high = -1
+                    std_skill.sort_high = -1 # acquired skills have a default high of -1 in the tree
                     std_skill.save()
 
-            # if the QuerySet is empty
+            # if q_set is empty (no prerequisites unacquired), std_skill is a lead (level 0)
             if q_set.count() == 0:
                 if std_skill not in list_level[0]:
                     list_level[0].append(std_skill)
@@ -581,29 +520,11 @@ class StudentSkill(models.Model):
                     std_skill.save()
                 return result+1
 
-        '''if(len(list_obj) == 0):
-            q_set_r = StudentSkill.objects.filter(student=current_stud)
-            ToReturn = [[]]
-            for stud_skill in q_set_r:
-                q_set_pre = StudentSkill.objects.filter(skill__in=stud_skill.skill.get_prerequisites_skills())
-                if len(q_set_pre) == 0:
-                    ToReturn[0].append(stud_skill)
-                else:
-                    to_take = True
-                    for std_skill  in q_set_pre:
-                        if std_skill.acquired == None:
-                            to_take = False
-                    if to_take and stud_skill not in ToReturn :
-                        ToReturn[0].append(stud_skill)
-            return ToReturn'''
-
-
         for std_skill_objective in list_obj:
             recursive(std_skill_objective)
 
         sort_criterion = getOrderSort()
         criterion1 = sort_criterion[0][0]
-        print (criterion1)
         list_std_skill = sorted(list_std_skill, key=lambda student_skill: getattr(student_skill,criterion1))
         prevList = []
         level_List = []
@@ -628,11 +549,9 @@ class StudentSkill(models.Model):
         else:
             return level_List
 
-    global var
-    var = 3
-
     @staticmethod
     def __next_line__():
+        """ Decide when to go to the next line """
         if var == 0:
             global  var
             var = random.randint(1,2)
@@ -643,6 +562,7 @@ class StudentSkill(models.Model):
 
     @staticmethod
     def __reset_counter_line__():
+        """ resest the value of var after an orange line in the student interface"""
         global var
         var = random.randint(1,2)
 
@@ -653,11 +573,15 @@ SORT_CHOICES = (
 )
 
 class Sort(models.Model):
+    """ Contains the three sort criterion """
+
     name      = models.TextField(null=False, editable = False)
+    ''' Name of the sort criterion'''
     weight    = models.IntegerField(choices=SORT_CHOICES, default=1)
+    ''' Weight of the sort criterion; 0 corresponds to the lowest priority level and 2 to the highest priority level '''
 
     def __unicode__(self):
-        sortOrder = None;
+        sortOrder = None
         if self.weight == 0 :
             sortOrder = "Third"
         elif self.weight == 1:
@@ -666,9 +590,30 @@ class Sort(models.Model):
             sortOrder = "First"
         return "{0} : {1}".format(self.name, sortOrder)
 
+
 def getOrderSort():
+    """ return an ordered list of the sort criterion. Initialize the table sort if it still empty """
+
     sortOrder =[]
     q_set_r = Sort.objects.filter(Q(name="Sort by number of unvalidated prerequisites") | Q(name="Sort by section name") | Q(name="Sort by time to make the exercice"))
+
+
+
+    if q_set_r.count() == 0:
+        Sort.objects.create(
+            name = "Sort by number of unvalidated prerequisites",
+            weight = 2,
+        )
+        Sort.objects.create(
+            name="Sort by section name",
+            weight= 1,
+        )
+        Sort.objects.create(
+            name="Sort by time to make the exercice",
+            weight= 0,
+        )
+        q_set_r = Sort.objects.filter(Q(name="Sort by number of unvalidated prerequisites") | Q(name="Sort by section name") | Q(name="Sort by time to make the exercice"))
+
     for sort in q_set_r:
         if sort.name == "Sort by number of unvalidated prerequisites":
             sortOrder.append(("sort_high",sort.weight))
@@ -678,4 +623,3 @@ def getOrderSort():
             sortOrder.append(("sort_time", sort.weight))
     sortOrder.sort(key=lambda tup: tup[1], reverse=True)
     return sortOrder
-    #print sortOrder
