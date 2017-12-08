@@ -539,6 +539,7 @@ SORT_CHOICES = (
     (0, "Third")
 )
 
+
 class Sort(models.Model):
     """ Contains the three sort criterion """
 
