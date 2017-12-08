@@ -399,7 +399,14 @@ class StudentSkill(models.Model):
                 reason_object=reason_object,
             )
 
-            if(not student_skill.acquired):
+            parents_not_recommended = True
+
+            q_set= StudentSkill.objects.filter(skill__in=student_skill.skill.get_depending_skills(),student=student_skill.student)
+            for std_skill in q_set:
+                if std_skill.is_recommended:
+                    parents_not_recommended = False
+
+            if(not student_skill.acquired and parents_not_recommended):
                 student_skill.is_recommended = None
                 student_skill.save()
 
@@ -467,7 +474,7 @@ class StudentSkill(models.Model):
             recursive(std_skill_objective)
 
 
-        sort_criterion = getOrderSort() # list of criterion ordered
+        sort_criterion = get_order_sort() # list of criterion ordered
 
 
         # sort according to the first sort criteria
@@ -541,20 +548,20 @@ class Sort(models.Model):
     ''' Weight of the sort criterion; 0 corresponds to the lowest priority level and 2 to the highest priority level '''
 
     def __unicode__(self):
-        sortOrder = None
+        sort_order = None
         if self.weight == 0 :
-            sortOrder = "Third"
+            sort_order = "Third"
         elif self.weight == 1:
-            sortOrder = "Second"
+            sort_order = "Second"
         else:
-            sortOrder = "First"
-        return "{0} : {1}".format(self.name, sortOrder)
+            sort_order = "First"
+        return "{0} : {1}".format(self.name, sort_order)
 
 
-def getOrderSort():
+def get_order_sort():
     """ return an ordered list of the sort criterion. Initialize the table sort if it still empty """
 
-    sortOrder =[]
+    sort_order =[]
     q_set_r = Sort.objects.filter(Q(name="Sort by number of unvalidated prerequisites") | Q(name="Sort by section name") | Q(name="Sort by time to make the exercice"))
 
     if q_set_r.count() == 0:
@@ -574,10 +581,10 @@ def getOrderSort():
 
     for sort in q_set_r:
         if sort.name == "Sort by number of unvalidated prerequisites":
-            sortOrder.append(("sort_high",sort.weight))
+            sort_order.append(("sort_high",sort.weight))
         elif sort.name == "Sort by section name":
-            sortOrder.append(("sort_section_name", sort.weight))
+            sort_order.append(("sort_section_name", sort.weight))
         else:
-            sortOrder.append(("sort_time", sort.weight))
-    sortOrder.sort(key=lambda tup: tup[1], reverse=True)
-    return sortOrder
+            sort_order.append(("sort_time", sort.weight))
+    sort_order.sort(key=lambda tup: tup[1], reverse=True)
+    return sort_order
