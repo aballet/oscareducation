@@ -156,7 +156,7 @@
                     .ligneorangefine
                     -reset_counter_line
 
-            %button#btnIncrease{:value => "1" ,:onclick => "increase_size(this.id)", :style => "float:right;  padding: 5px; margin: 4px 2px; border-radius:50%;"} +
+            %button#btnIncrease.glyphicon.glyphicon-plus-sign{:value => "1" ,:onclick => "increase_size(this.id)", :style => "float:right; font-size: 20px; padding: 5px; margin: 4px 2px;"}
 
 
 
@@ -189,13 +189,15 @@
       if(value==1)
       {
         document.getElementById('skillsList').style.height = '100%';
-        document.getElementById("btnIncrease").innerHTML = "-";
+        document.getElementById("btnIncrease").classList.remove("glyphicon-plus-sign");
+        document.getElementById("btnIncrease").classList.add("glyphicon-minus-sign");
         document.getElementById("btnIncrease").value = "0";
       }
       else
       {
         document.getElementById('skillsList').style.height = '400px';
-        document.getElementById("btnIncrease").innerHTML = "+";
+        document.getElementById("btnIncrease").classList.remove("glyphicon-minus-sign");
+        document.getElementById("btnIncrease").classList.add("glyphicon-plus-sign");
         document.getElementById("btnIncrease").value = "1";
       }
     }
