@@ -230,9 +230,11 @@ class StudentSkill(models.Model):
     is_recommended = models.DateField(default=None, null=True)
     """When the Skill was set as recommended"""
     sort_high = models.IntegerField(default = 0, null=True)
-    """ """
+    """ High in the prerequisites tree """
     sort_section_name = models.CharField(max_length=255, null=True)
+    """ Section name """
     sort_time = models.IntegerField(default = 0, null=True)
+    """ Average time spent by the student to achieve the skill"""
 
     def __unicode__(self):
         return u"%s - %s - %s" % (
@@ -554,8 +556,6 @@ def getOrderSort():
 
     sortOrder =[]
     q_set_r = Sort.objects.filter(Q(name="Sort by number of unvalidated prerequisites") | Q(name="Sort by section name") | Q(name="Sort by time to make the exercice"))
-
-
 
     if q_set_r.count() == 0:
         Sort.objects.create(

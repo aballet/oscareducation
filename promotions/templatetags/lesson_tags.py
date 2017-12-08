@@ -23,6 +23,7 @@ def reset_counter_line(context):
 
 @register.simple_tag(takes_context=True)
 def get_depth_sorted_students_skills(context, of_keyword, student, at_keyword, stage, as_keyword, target_name):
+    """ return a list of list of sorted skills """
     set = StudentSkill.objects.filter(skill__in=stage.skills.all(), student=student)
     remove = set.exclude(is_objective = None)
     context[target_name] = StudentSkill.__depth_sort_skills__(remove,student)
