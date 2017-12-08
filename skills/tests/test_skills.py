@@ -45,6 +45,7 @@ class SkillsTests(TestCase):
         """"Check get_prerequisites_skills function"""
         pre = self.skill_tab[0].get_prerequisites_skills()
         self.assertTrue(self.skill_tab[1] in pre)
+        self.assertEquals(len(pre), 1)
 
     def test_dependance_skills_2(self):
         """"Check get_depending_skills function for 2 dependances"""
@@ -53,6 +54,7 @@ class SkillsTests(TestCase):
         self.assertTrue(self.skill_tab[0] in dep)
         self.assertTrue(self.skill_tab[2] in dep)
         self.assertFalse(self.skill_tab[1] in dep)
+        self.assertEquals(len(dep), 2)
 
     def test_recommended_to_learn_false(self):
         """Check that recommended_to_learn is false"""
@@ -106,23 +108,63 @@ class SkillsTests(TestCase):
         self.assertFalse(self.stud_skill_tab[1].recommended_to_learn())
         self.assertFalse(self.stud_skill_tab[2].recommended_to_learn())
 
-    def test_cant_add_objective(self):
-        """Check cant_add_objective for 1 skill"""
-        for stud_skill in self.stud_skill_tab:
-            self.assertFalse(stud_skill.cant_add_objective())
-
+    def test_remove_objective_prereq_objective(self):
+        """Check remove_objective for 1 skill but not its prerequisite as it is
+           also an objective."""
         self.stud_skill_tab[0].set_objective(self.prof_user, "because", self.lesson1)
-
-        for stud_skill in self.stud_skill_tab:
-            self.assertFalse(stud_skill.cant_add_objective())
-
+        self.reload_db_info()
         self.stud_skill_tab[1].set_objective(self.prof_user, "because", self.lesson1)
+        self.reload_db_info()
+        self.assertTrue(self.stud_skill_tab[0].recommended_to_learn())
+        self.assertTrue(self.stud_skill_tab[1].recommended_to_learn())
+        self.stud_skill_tab[0].remove_objective(self.prof_user, "because", self.lesson1)
+        self.reload_db_info()
+        self.assertFalse(self.stud_skill_tab[0].recommended_to_learn())
+        self.assertTrue(self.stud_skill_tab[1].recommended_to_learn())
+        self.assertFalse(self.stud_skill_tab[2].recommended_to_learn())
 
+    def test_remove_objective_prereq_recommended(self):
+        """Check remove_objective for 1 skill but not its prerequisite as it is
+           common to another objective."""
+        relation3 = Relations.objects.create(from_skill=self.skill_tab[1], to_skill=self.skill_tab[3], relation_type="depend_on")
+        relation4 = Relations.objects.create(from_skill=self.skill_tab[2], to_skill=self.skill_tab[3], relation_type="depend_on")
+        self.stud_skill_tab[1].set_objective(self.prof_user, "because", self.lesson1)
+        self.reload_db_info()
+        self.stud_skill_tab[2].set_objective(self.prof_user, "because", self.lesson1)
+        self.reload_db_info()
+        self.assertTrue(self.stud_skill_tab[1].recommended_to_learn())
+        self.assertTrue(self.stud_skill_tab[2].recommended_to_learn())
+        self.assertTrue(self.stud_skill_tab[3].recommended_to_learn())
+        self.stud_skill_tab[1].remove_objective(self.prof_user, "because", self.lesson1)
+        self.reload_db_info()
+        self.assertFalse(self.stud_skill_tab[1].recommended_to_learn())
+        self.assertTrue(self.stud_skill_tab[2].recommended_to_learn())
+        self.assertTrue(self.stud_skill_tab[3].recommended_to_learn())
+
+    def test_cant_add_objective_0(self):
+        """Check cant_add_objective for no objective"""
         for stud_skill in self.stud_skill_tab:
             self.assertFalse(stud_skill.cant_add_objective())
 
-        self.stud_skill_tab[2].set_objective(self.prof_user, "because", self.lesson1)
+    def test_cant_add_objective_1(self):
+        """Check cant_add_objective for 1 objective"""
+        for stud_skill in self.stud_skill_tab:
+            self.assertFalse(stud_skill.cant_add_objective())
+        self.stud_skill_tab[0].set_objective(self.prof_user, "because", self.lesson1)
+        for stud_skill in self.stud_skill_tab:
+            self.assertFalse(stud_skill.cant_add_objective())
 
+    def test_cant_add_objective_3(self):
+        """Check cant_add_objective for the 3 objectives"""
+        for stud_skill in self.stud_skill_tab:
+            self.assertFalse(stud_skill.cant_add_objective())
+        self.stud_skill_tab[0].set_objective(self.prof_user, "because", self.lesson1)
+        for stud_skill in self.stud_skill_tab:
+            self.assertFalse(stud_skill.cant_add_objective())
+        self.stud_skill_tab[1].set_objective(self.prof_user, "because", self.lesson1)
+        for stud_skill in self.stud_skill_tab:
+            self.assertFalse(stud_skill.cant_add_objective())
+        self.stud_skill_tab[2].set_objective(self.prof_user, "because", self.lesson1)
         for stud_skill in self.stud_skill_tab:
             self.assertTrue(stud_skill.cant_add_objective())
 
