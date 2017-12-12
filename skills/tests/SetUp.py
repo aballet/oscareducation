@@ -1,24 +1,28 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+
 from django.contrib.auth.models import User
 from promotions.models import Lesson, Stage
 from users.models import Professor, Student
-from skills.models import Skill, StudentSkill, Section
-from resources.models import Resource
-from selenium.webdriver.common.keys import Keys
-from django.test import Client
+from skills.models import Skill, StudentSkill, Section, Relations
+
 import time
 
 
 class SetUp(StaticLiveServerTestCase):
+    admin_username = "adrien"
+    admin_password = "cachou2003"
 
     def setUp(self):
         self.browser = webdriver.Firefox()
-        # self.selenium.implicitly_wait(10)
 
         # Creation of the professor and setting up the database
         user_prof = User.objects.create_user(username='prof', password='prof', email='prof@example.com')
         user_prof.save()
+        self.user_prof = user_prof
         prof = Professor.objects.create(user=user_prof, is_pending=False)
         prof.save()
         self.prof = prof
@@ -88,7 +92,19 @@ class SetUp(StaticLiveServerTestCase):
         stage.skills.add(skill3)
         stage.skills.add(skill4)
 
-        # Linl students to the skills
+        # Add relation between skills 3 and 4
+        # from_skill = models.ForeignKey(Skill, null=False, blank=False, related_name='from_skill', default=0)
+        # to_skill = models.ForeignKey(Skill, null=False, blank=False, related_name='to_skill', default=0)
+        # relation_type = models.CharField(max_length=255, null=False, blank=False, choices=(
+        #
+        #     ("depend_on", "depend de"),
+        #     ("similar_to", "similaire a"),
+        #     ("identic_to", "identique a"),
+        # ))
+        relation = Relations.objects.create(from_skill=skill3, to_skill=skill4, relation_type="depend_on")
+        relation.save()
+
+        # Link students to the skills
         student_skill11 = StudentSkill.objects.create(student=student1, skill=skill1)
         student_skill12 = StudentSkill.objects.create(student=student1, skill=skill2)
         student_skill13 = StudentSkill.objects.create(student=student1, skill=skill3)
@@ -97,6 +113,10 @@ class SetUp(StaticLiveServerTestCase):
         student_skill12.default(user_prof, "Test purpose", lesson)
         student_skill13.default(user_prof, "Test purpose", lesson)
         student_skill14.default(user_prof, "Test purpose", lesson)
+        self.student_skill11 = student_skill11
+        self.student_skill12 = student_skill12
+        self.student_skill13 = student_skill13
+        self.student_skill14 = student_skill14
 
         student_skill21 = StudentSkill.objects.create(student=student2, skill=skill1)
         student_skill22 = StudentSkill.objects.create(student=student2, skill=skill2)
@@ -106,6 +126,10 @@ class SetUp(StaticLiveServerTestCase):
         student_skill22.default(user_prof, "Test purpose", lesson)
         student_skill23.default(user_prof, "Test purpose", lesson)
         student_skill24.default(user_prof, "Test purpose", lesson)
+        self.student_skill21 = student_skill21
+        self.student_skill22 = student_skill22
+        self.student_skill23 = student_skill23
+        self.student_skill24 = student_skill24
 
         student_skill31 = StudentSkill.objects.create(student=student3, skill=skill1)
         student_skill32 = StudentSkill.objects.create(student=student3, skill=skill2)
@@ -115,9 +139,12 @@ class SetUp(StaticLiveServerTestCase):
         student_skill32.default(user_prof, "Test purpose", lesson)
         student_skill33.default(user_prof, "Test purpose", lesson)
         student_skill34.default(user_prof, "Test purpose", lesson)
+        self.student_skill31 = student_skill31
+        self.student_skill32 = student_skill32
+        self.student_skill33 = student_skill33
+        self.student_skill34 = student_skill34
 
         super(SetUp, self).setUp()
-
 
     def tearDown(self):
         self.browser.quit()
@@ -130,9 +157,6 @@ class SetUp(StaticLiveServerTestCase):
         self.browser.find_element_by_id("id_password").send_keys("prof")
         self.browser.find_element_by_xpath('//*[@id="login-form"]/div[3]/input').click()
         time.sleep(5)
-
-    def disconnect(self):
-        self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/div/div/ul/li/a').click()
 
     def connect_student(self, number=1):
         self.browser.get(self.live_server_url + "/accounts/usernamelogin/")
@@ -151,3 +175,16 @@ class SetUp(StaticLiveServerTestCase):
         self.browser.find_elements_by_id("id_password")[1].send_keys("student")
         self.browser.find_element_by_xpath('//*[@id="login-form"]/div[4]/input').click()
         time.sleep(10)
+
+    def disconnect(self):
+        self.browser.find_element_by_xpath('/html/body/div[2]/div[1]/div/div/ul/li/a').click()
+
+    def connect_admin(self):
+        self.browser.get(self.live_server_url + "/admin/")
+        self.browser.find_element_by_id("id_username").send_keys(self.admin_username)
+        self.browser.find_element_by_id("id_password").send_keys(self.admin_password)
+        self.browser.find_element_by_xpath('//*[@id="login-form"]/div[3]/input').click()
+        time.sleep(5)
+
+    def disconnect_admin(self):
+        self.browser.find_element_by_xpath('//*[@id="user-tools"]/a[3]').click()
