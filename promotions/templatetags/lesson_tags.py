@@ -36,7 +36,15 @@ def get_student_target_skills(context, of_keyword, student, at_keyword, stage, a
     for student_skill in student_skills:
         if student_skill.is_objective:
          list_target_skills.append(student_skill)
-    context[target_name] = sorted(list_target_skills)
+
+    index = [0,1,2]
+    d_end = {}
+    for e in range(len(list_target_skills),3):
+        d_end.update({e:""})
+
+    d = dict((index[i],list_target_skills[i]) for i in range(0,len(list_target_skills)))
+    d.update(d_end)
+    context[target_name] = d # sorted(list_target_skills)
     return ""
 
 @register.simple_tag(takes_context=True)
