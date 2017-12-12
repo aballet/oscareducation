@@ -48,7 +48,6 @@
               .form-group
                 -for student in lesson.students.all
                   -get_student_target_skills of student at lesson.stages_in_unchronological_order.0 rename "list_target_skills"
-                    {{list_target_skills}}
                     %tr
                       %td
                         %input.checkthis{value:"{{student.id}}", name:"competences_students",type:"checkbox"}/
