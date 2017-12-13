@@ -1,8 +1,5 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 
 from django.contrib.auth.models import User
 from promotions.models import Lesson, Stage
@@ -13,8 +10,6 @@ import time
 
 
 class SetUp(StaticLiveServerTestCase):
-    admin_username = "adrien"
-    admin_password = "cachou2003"
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -181,8 +176,8 @@ class SetUp(StaticLiveServerTestCase):
 
     def connect_admin(self):
         self.browser.get(self.live_server_url + "/admin/")
-        self.browser.find_element_by_id("id_username").send_keys(self.admin_username)
-        self.browser.find_element_by_id("id_password").send_keys(self.admin_password)
+        self.browser.find_element_by_id("id_username").send_keys("username")
+        self.browser.find_element_by_id("id_password").send_keys("password")
         self.browser.find_element_by_xpath('//*[@id="login-form"]/div[3]/input').click()
         time.sleep(5)
 
