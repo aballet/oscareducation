@@ -46,17 +46,17 @@
                 -for student in lesson.students.all
                   -get_student_target_skills of student at lesson.stages_in_unchronological_order.0 rename "list_target_skills"
                     %tr
-                      %td
+                      %td{:style=>"width: 5%;"}
                         %input.checkthis{value:"{{student.id}}", name:"competences_students",type:"checkbox"}/
-                      %td
+                      %td{:style=>"width: 20%;"}
                         %a{href: "{% url 'professor:lesson_student_detail' lesson.pk student.pk %}"}= student
-                      %td
+                      %td{:style=>"width: 25%;"}
                         %span{data-toggle:"tooltip", data-placement:"right", title:"{{list_target_skills.0.skill.name}}"}
                           {{list_target_skills.0.skill.name}}
-                      %td
+                      %td{:style=>"width: 25%;"}
                         %span{data-toggle:"tooltip", data-placement:"right", title:"{{list_target_skills.1.skill.name}}"}
                           {{list_target_skills.1.skill.name}}
-                      %td
+                      %td{:style=>"width: 25%;"}
                         %span{data-toggle:"tooltip", data-placement:"right", title:"{{list_target_skills.2.skill.name}}"}
                           {{list_target_skills.2.skill.name}}
          .ligneorangefine
