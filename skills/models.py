@@ -423,55 +423,6 @@ class StudentSkill(models.Model):
             return True
         return False
 
-    def set_objective(self, who, reason, reason_object):
-        """"Reset" a Skill (change its status to "unknown")"""
-        def recommend_student_skill(student_skill):
-            SkillHistory.objects.create(
-                skill=self.skill,
-                student=self.student,
-                value="recommended",
-                by_who=who,
-                reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
-                reason_object=reason_object,
-            )
-
-            if(not student_skill.acquired):
-                student_skill.is_recommended = datetime.now()
-                student_skill.save()
-
-        self.is_objective = datetime.now()
-        self.is_recommended = datetime.now()
-        self.save()
-        self.go_down_visitor(recommend_student_skill)
-
-    def remove_objective(self, who, reason, reason_object):
-        """"Reset" a Skill (change its status to "unknown")"""
-        def not_recommend_student_skill(student_skill):
-            SkillHistory.objects.create(
-                skill=self.skill,
-                student=self.student,
-                value="not recommended",
-                by_who=who,
-                reason=reason if student_skill == self else "Déterminé depuis une réponse précédente.",
-                reason_object=reason_object,
-            )
-
-            if(not student_skill.acquired):
-                student_skill.is_recommended = None
-                student_skill.save()
-
-        self.is_objective = None
-        self.is_recommended = None
-        self.save()
-        self.go_down_visitor(not_recommend_student_skill)
-
-    def cant_add_objective(self):
-        req = StudentSkill.objects.filter(student=self.student)
-        list_objectives = req.exclude(is_objective = None)
-        print(list_objectives.count())
-        if list_objectives.count() >= 3:
-            return True
-        return False
 
     def recommended_to_learn(self):
         """
