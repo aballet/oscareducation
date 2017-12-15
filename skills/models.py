@@ -238,7 +238,7 @@ class StudentSkill(models.Model):
 
     def __unicode__(self):
         return u"%s - %s - %s" % (
-            self.student, self.skill, "green" if self.acquired else ("orange" if self.tested else "white"))
+        self.student, self.skill, "green" if self.acquired else ("orange" if self.tested else "white"))
 
     def go_down_visitor(self, function):
         """Help function to explore and validate prerequisites when a Skill is validated"""
