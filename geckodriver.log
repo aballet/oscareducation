@@ -5934,3 +5934,37 @@ See /usr/include/servers/bootstrap_defs.h for the error codes.
 1513162061473	Marionette	DEBUG	Received DOM event "DOMContentLoaded" for "http://localhost:56975/"
 1513162061609	Marionette	DEBUG	Received DOM event "pageshow" for "http://localhost:56975/"
 [GFX1-]: Receive IPC close with reason=AbnormalShutdown
+1513326348104	geckodriver	INFO	geckodriver 0.19.1
+1513326348116	geckodriver	INFO	Listening on 127.0.0.1:50030
+1513326349319	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-profile" "/var/folders/p8/qh61wlt117q20ckdvkz1ztr00000gn/T/rust_mozprofile.ZFMWWlqkW2ol"
+1513326350239	Marionette	INFO	Enabled via --marionette
+2017-12-15 08:25:51.386 plugin-container[1982:61848] *** CFMessagePort: bootstrap_register(): failed 1100 (0x44c) 'Permission denied', port = 0x7703, name = 'com.apple.tsm.portname'
+See /usr/include/servers/bootstrap_defs.h for the error codes.
+1513326352114	Marionette	INFO	Listening on port 50039
+1513326352150	Marionette	WARN	TLS certificate errors will be ignored for this session
+1513326352223	Marionette	DEBUG	Register listener.js for window 2147483649
+1513326352691	Marionette	DEBUG	Received DOM event "beforeunload" for "about:blank"
+1513326353147	Marionette	DEBUG	Received DOM event "pagehide" for "about:blank"
+1513326353148	Marionette	DEBUG	Received DOM event "unload" for "about:blank"
+1513326353161	Marionette	DEBUG	Received DOM event "DOMContentLoaded" for "http://localhost:50029/accounts/usernamelogin/"
+1513326353673	Marionette	DEBUG	Received DOM event "pageshow" for "http://localhost:50029/accounts/usernamelogin/"
+1513326353792	Marionette	DEBUG	Received DOM event "beforeunload" for "http://localhost:50029/accounts/usernamelogin/"
+1513326354552	Marionette	DEBUG	Received DOM event "pagehide" for "http://localhost:50029/accounts/usernamelogin/"
+1513326354554	Marionette	DEBUG	Received DOM event "unload" for "http://localhost:50029/accounts/usernamelogin/"
+1513326354601	Marionette	DEBUG	Received DOM event "DOMContentLoaded" for "http://localhost:50029/accounts/passwordlogin/"
+1513326354660	Marionette	DEBUG	Received DOM event "pageshow" for "http://localhost:50029/accounts/passwordlogin/"
+1513326354989	Marionette	DEBUG	Received DOM event "beforeunload" for "http://localhost:50029/accounts/passwordlogin/"
+1513326355850	Marionette	DEBUG	Received DOM event "pagehide" for "http://localhost:50029/accounts/passwordlogin/"
+1513326355850	Marionette	DEBUG	Received DOM event "unload" for "http://localhost:50029/accounts/passwordlogin/"
+1513326357704	Marionette	DEBUG	Received DOM event "DOMContentLoaded" for "http://localhost:50029/professor/dashboard/"
+1513326357760	Marionette	DEBUG	Received DOM event "pageshow" for "http://localhost:50029/professor/dashboard/"
+1513326362805	Marionette	DEBUG	Received DOM event "beforeunload" for "http://localhost:50029/professor/dashboard/"
+1513326363170	Marionette	DEBUG	Received DOM event "pagehide" for "http://localhost:50029/professor/dashboard/"
+1513326363171	Marionette	DEBUG	Received DOM event "unload" for "http://localhost:50029/professor/dashboard/"
+1513326363175	Marionette	DEBUG	Received DOM event "DOMContentLoaded" for "http://localhost:50029/professor/lesson/1/"
+1513326363181	Marionette	DEBUG	Received DOM event "pageshow" for "http://localhost:50029/professor/lesson/1/"
+1513326369238	geckodriver	INFO	geckodriver 0.19.1
+1513326369242	geckodriver	INFO	Listening on 127.0.0.1:50172
+1513326370687	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-profile" "/var/folders/p8/qh61wlt117q20ckdvkz1ztr00000gn/T/rust_mozprofile.e6o9VT9XD6TH"
+1513326371419	Marionette	INFO	Enabled via --marionette
+[Child 1996, Chrome_ChildThread] WARNING: pipe error: Broken pipe: file /builds/worker/workspace/build/src/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 709
